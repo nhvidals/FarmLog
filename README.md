@@ -1,0 +1,133 @@
+# Farm Animals Mobile App (iOS + Android)
+
+Farm and livestock management app with support for:
+
+- Animal records with photo, birth date, sex, designation, category (oviparous/viviparous), and ring number
+- Animal genealogy tree (father/mother)
+- Egg incubation management with scheduled notifications
+- Medication scheduling with scheduled notifications
+- MongoDB persistence
+- Multi-farm support (data isolated per farm)
+- JSON data import and export
+- Language selector: Portuguese (PT) / English (EN)
+
+## Project Structure
+
+```
+.                        API — Node.js + Express + Mongoose
+./src
+  routes/                Express routers (farms, animals, incubation, medication, data)
+  models/                Mongoose models
+  utils/                 Shared utilities (farmContext)
+  types/                 Domain types
+  __tests__/             Integration tests (Jest + Supertest)
+./app                    Mobile app — React Native + Expo
+./app/src
+  api.ts                 Axios client factory
+  types.ts               Shared domain types
+  i18n.ts                PT/EN translations
+```
+
+## Requirements
+
+- Node.js 20+
+- MongoDB (local or remote)
+- Expo Go (or Android/iOS emulator)
+
+---
+
+## API Setup
+
+1. Install dependencies:
+
+```bash
+npm install
+```
+
+2. Set `MONGODB_URI` in a `.env` file if needed (defaults to `mongodb://localhost:27017/farm_animals`).
+
+3. Run in development:
+
+```bash
+npm run dev
+```
+
+4. Production build:
+
+```bash
+npm run build
+npm start
+```
+
+The API starts on `http://localhost:4000` by default.
+
+### Endpoints
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET / POST | `/farms` | List / create farms |
+| GET / POST / PUT / DELETE | `/animals` | Animal CRUD |
+| GET | `/animals/:id/tree` | Genealogy tree |
+| GET / POST / PUT / DELETE | `/incubation` | Incubation batch CRUD |
+| GET / POST / PUT / DELETE | `/medication` | Medication schedule CRUD |
+| GET | `/data/export` | Export farm data as JSON |
+| POST | `/data/import` | Import JSON data into a farm |
+
+### Multi-farm
+
+All data endpoints require a `farmId`, supplied as:
+
+- Header: `x-farm-id: <id>`
+- Query param: `?farmId=<id>`
+
+The mobile app sends it automatically based on the active farm selected in the UI.
+
+---
+
+## Tests
+
+Integration tests use Jest + Supertest + MongoDB Memory Server — no running database required.
+
+```bash
+npm test
+```
+
+Test suites in `src/__tests__/` cover all routes: farms, animals (including the genealogy tree), incubation, medication, and import/export (72 tests).
+
+---
+
+## Mobile App Setup
+
+```bash
+cd app
+npm install
+npm start
+```
+
+Then:
+
+- Press `a` for Android
+- Press `i` for iOS (macOS only)
+- Scan the QR code with Expo Go
+
+### Connecting to the API
+
+Set the **API Base URL** field at the top of the app:
+
+| Environment | URL |
+|---|---|
+| Android Emulator | `http://10.0.2.2:4000` |
+| iOS Simulator | `http://localhost:4000` |
+| Physical device | `http://<YOUR_LOCAL_IP>:4000` |
+
+### Language
+
+Tap **PT** or **EN** in the top-right corner to switch languages. All labels, buttons, alerts, and notifications update instantly.
+
+---
+
+## Notes
+
+- Notifications are local and scheduled at record-creation time (incubation hatch date, medication date).
+- Import/export uses JSON files matching the structure returned by `GET /data/export`. Strip `_id` fields when importing into a different farm to avoid duplicate key conflicts.
+- Animal photos use the device's local URI (MVP). For production use remote storage (S3, Cloudinary, etc.).
