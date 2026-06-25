@@ -7,6 +7,13 @@ const IncubationBatch_1 = require("../models/IncubationBatch");
 const MedicationSchedule_1 = require("../models/MedicationSchedule");
 const farmContext_1 = require("../utils/farmContext");
 exports.importExportRouter = (0, express_1.Router)();
+function isValidDateValue(value) {
+    if (typeof value !== "string" && !(value instanceof Date) && typeof value !== "number") {
+        return false;
+    }
+    const date = new Date(value);
+    return !Number.isNaN(date.getTime());
+}
 exports.importExportRouter.get("/export", async (req, res) => {
     const farmId = (0, farmContext_1.getFarmIdFromRequest)(req, res);
     if (!farmId)
@@ -38,6 +45,15 @@ exports.importExportRouter.post("/import", async (req, res) => {
     const animals = Array.isArray(payload.animals) ? payload.animals.map(strip) : [];
     const incubation = Array.isArray(payload.incubation) ? payload.incubation.map(strip) : [];
     const medication = Array.isArray(payload.medication) ? payload.medication.map(strip) : [];
+    const hasInvalidAnimalDates = animals.some((entry) => !isValidDateValue(entry.birthDate));
+    const hasInvalidIncubationDates = incubation.some((entry) => {
+        const data = entry;
+        return !isValidDateValue(data.startDate) || !isValidDateValue(data.expectedHatchDate);
+    });
+    const hasInvalidMedicationDates = medication.some((entry) => !isValidDateValue(entry.date));
+    if (hasInvalidAnimalDates || hasInvalidIncubationDates || hasInvalidMedicationDates) {
+        return res.status(400).json({ message: "Invalid import payload" });
+    }
     try {
         await Promise.all([
             animals.length > 0 ? Animal_1.AnimalModel.insertMany(animals, { ordered: false }) : Promise.resolve(),

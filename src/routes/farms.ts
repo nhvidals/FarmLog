@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { FarmModel } from "../models/Farm";
 import { AnimalModel } from "../models/Animal";
+import { AnimalTypeModel } from "../models/AnimalType";
 import { IncubationBatchModel } from "../models/IncubationBatch";
 import { MedicationScheduleModel } from "../models/MedicationSchedule";
 
@@ -35,6 +36,7 @@ farmsRouter.delete("/:id", async (req, res) => {
     const farmId = req.params.id;
     await Promise.all([
       AnimalModel.deleteMany({ farmId }),
+      AnimalTypeModel.deleteMany({ farmId }),
       IncubationBatchModel.deleteMany({ farmId }),
       MedicationScheduleModel.deleteMany({ farmId }),
     ]);

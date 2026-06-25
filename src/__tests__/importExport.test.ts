@@ -66,11 +66,21 @@ describe("GET /data/export", () => {
     const farmId = await createFarm();
     const res = await request(app).get("/data/export").set("x-farm-id", farmId);
     expect(res.status).toBe(200);
+    expect(res.body.animalTypes).toEqual([]);
     expect(res.body.animals).toEqual([]);
     expect(res.body.incubation).toEqual([]);
     expect(res.body.medication).toEqual([]);
     expect(res.body.farmId).toBe(farmId);
     expect(res.body.exportedAt).toBeDefined();
+  });
+
+  it("exports animal types belonging to the farm", async () => {
+    const farmId = await createFarm();
+    await request(app).post("/animal-types").set("x-farm-id", farmId).send({ name: "Galinha", category: "oviparous" });
+
+    const res = await request(app).get("/data/export").set("x-farm-id", farmId);
+    expect(res.body.animalTypes).toHaveLength(1);
+    expect(res.body.animalTypes[0].name).toBe("Galinha");
   });
 
   it("exports all records for the farm", async () => {
@@ -143,6 +153,19 @@ describe("POST /data/import", () => {
     expect(res.body.imported.medication).toBe(0);
   });
 
+  it("imports animal types into the target farm", async () => {
+    const farmId = await createFarm();
+    const res = await request(app)
+      .post("/data/import")
+      .set("x-farm-id", farmId)
+      .send({ animalTypes: [{ name: "Galinha", category: "oviparous" }, { name: "Pato", category: "oviparous" }] });
+    expect(res.status).toBe(201);
+    expect(res.body.imported.animalTypes).toBe(2);
+
+    const list = await request(app).get("/animal-types").set("x-farm-id", farmId);
+    expect(list.body.map((t: { name: string }) => t.name)).toEqual(["Galinha", "Pato"]);
+  });
+
   it("handles missing array keys gracefully (treats them as empty)", async () => {
     const farmId = await createFarm();
     const res = await request(app)
@@ -151,6 +174,25 @@ describe("POST /data/import", () => {
       .send({});
     expect(res.status).toBe(201);
     expect(res.body.imported.animals).toBe(0);
+  });
+
+  it("returns 400 when imported animal has invalid birthDate", async () => {
+    const farmId = await createFarm();
+    const res = await request(app)
+      .post("/data/import")
+      .set("x-farm-id", farmId)
+      .send({
+        animals: [{
+          name: "Bad Date",
+          designation: "Hen",
+          category: "oviparous",
+          birthDate: "not-a-date",
+          sex: "female",
+          ringNumber: "R-BAD"
+        }]
+      });
+
+    expect(res.status).toBe(400);
   });
 
   it("overrides farmId on all imported records with the target farm", async () => {

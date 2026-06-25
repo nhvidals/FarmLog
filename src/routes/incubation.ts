@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { IncubationBatchModel } from "../models/IncubationBatch";
 import { getFarmIdFromRequest } from "../utils/farmContext";
+import { farmExists, validateHatchOrder } from "../utils/validation";
 
 export const incubationRouter = Router();
 
@@ -21,6 +22,11 @@ incubationRouter.post("/", async (req, res) => {
   if (!farmId) return;
 
   try {
+    if (!(await farmExists(farmId))) return res.status(404).json({ message: "Farm not found" });
+
+    const dateError = validateHatchOrder(req.body?.startDate, req.body?.expectedHatchDate);
+    if (dateError) return res.status(400).json({ message: dateError.message });
+
     const created = await IncubationBatchModel.create({ ...req.body, farmId });
     return res.status(201).json(created);
   } catch (error) {
@@ -35,6 +41,16 @@ incubationRouter.put("/:id", async (req, res) => {
   const { _id, farmId: _farmId, createdAt, updatedAt, ...safeBody } = req.body;
 
   try {
+    if (safeBody.startDate !== undefined || safeBody.expectedHatchDate !== undefined) {
+      const existing = await IncubationBatchModel.findOne({ _id: req.params.id, farmId }).lean();
+      if (existing) {
+        const start = safeBody.startDate ?? existing.startDate;
+        const hatch = safeBody.expectedHatchDate ?? existing.expectedHatchDate;
+        const dateError = validateHatchOrder(start, hatch);
+        if (dateError) return res.status(400).json({ message: dateError.message });
+      }
+    }
+
     const updated = await IncubationBatchModel.findOneAndUpdate(
       { _id: req.params.id, farmId },
       safeBody,

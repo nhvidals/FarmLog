@@ -124,6 +124,15 @@ Set the **API Base URL** field at the top of the app:
 
 Tap **PT** or **EN** in the top-right corner to switch languages. All labels, buttons, alerts, and notifications update instantly.
 
+### Mobile Regression Checks
+
+Use [app/REGRESSION_TEST_PLAN.md](app/REGRESSION_TEST_PLAN.md) for the manual regression checklist that covers:
+
+- Active farm reselection after deletion
+- Import/export farm-selection guards
+- Safe handling of invalid date values in UI rendering
+- Sharing availability fallback behavior
+
 ---
 
 ## Notes

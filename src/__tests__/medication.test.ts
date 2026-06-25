@@ -121,6 +121,22 @@ describe("POST /medication", () => {
     const res = await createMedication(farmId, new Types.ObjectId().toString());
     expect(res.status).toBe(400);
   });
+
+  it("returns 404 when the farm does not exist", async () => {
+    const res = await createMedication(
+      new Types.ObjectId().toString(),
+      new Types.ObjectId().toString()
+    );
+    expect(res.status).toBe(404);
+  });
+
+  it("returns 400 for malformed farmId", async () => {
+    const res = await request(app)
+      .post("/medication")
+      .set("x-farm-id", "bad-id")
+      .send({ medicineName: "X", dose: "1mg", date: "2026-06-01", animalId: new Types.ObjectId().toString() });
+    expect(res.status).toBe(400);
+  });
 });
 
 // ── PUT /medication/:id ───────────────────────────────────────────────────────

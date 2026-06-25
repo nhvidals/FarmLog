@@ -2,6 +2,7 @@ import { Router } from "express";
 import { AnimalModel } from "../models/Animal";
 import { MedicationScheduleModel } from "../models/MedicationSchedule";
 import { getFarmIdFromRequest } from "../utils/farmContext";
+import { farmExists } from "../utils/validation";
 
 export const medicationRouter = Router();
 
@@ -11,7 +12,7 @@ medicationRouter.get("/", async (req, res) => {
 
   try {
     const entries = await MedicationScheduleModel.find({ farmId })
-      .populate("animalId", "name designation category ringNumber")
+      .populate("animalId", "name designation ringNumber")
       .sort({ date: 1 })
       .lean();
     res.json(entries);
@@ -25,6 +26,8 @@ medicationRouter.post("/", async (req, res) => {
   if (!farmId) return;
 
   try {
+    if (!(await farmExists(farmId))) return res.status(404).json({ message: "Farm not found" });
+
     const animal = await AnimalModel.findOne({ _id: req.body?.animalId, farmId }).lean();
     if (!animal) return res.status(400).json({ message: "Animal does not exist in this farm" });
 

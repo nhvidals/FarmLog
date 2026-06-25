@@ -1,6 +1,7 @@
 import cors from "cors";
 import express from "express";
 import { animalsRouter } from "./routes/animals";
+import { animalTypesRouter } from "./routes/animalTypes";
 import { incubationRouter } from "./routes/incubation";
 import { medicationRouter } from "./routes/medication";
 import { importExportRouter } from "./routes/importExport";
@@ -16,6 +17,7 @@ app.get("/health", (_req, res) => {
 });
 
 app.use("/farms", farmsRouter);
+app.use("/animal-types", animalTypesRouter);
 app.use("/animals", animalsRouter);
 app.use("/incubation", incubationRouter);
 app.use("/medication", medicationRouter);

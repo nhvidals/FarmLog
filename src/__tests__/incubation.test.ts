@@ -85,6 +85,40 @@ describe("POST /incubation", () => {
     const res = await createBatch(farmId, { eggCount: 0 });
     expect(res.status).toBe(400);
   });
+
+  it("returns 404 when the farm does not exist", async () => {
+    const res = await request(app)
+      .post("/incubation")
+      .set("x-farm-id", new Types.ObjectId().toString())
+      .send(baseBatch());
+    expect(res.status).toBe(404);
+  });
+
+  it("returns 400 when expectedHatchDate is before startDate", async () => {
+    const farmId = await createFarm();
+    const res = await createBatch(farmId, {
+      startDate: "2026-02-01",
+      expectedHatchDate: "2026-01-01",
+    });
+    expect(res.status).toBe(400);
+  });
+
+  it("accepts a batch where hatch date equals start date", async () => {
+    const farmId = await createFarm();
+    const res = await createBatch(farmId, {
+      startDate: "2026-01-01",
+      expectedHatchDate: "2026-01-01",
+    });
+    expect(res.status).toBe(201);
+  });
+
+  it("returns 400 for malformed farmId", async () => {
+    const res = await request(app)
+      .post("/incubation")
+      .set("x-farm-id", "bad-id")
+      .send(baseBatch());
+    expect(res.status).toBe(400);
+  });
 });
 
 // ── PUT /incubation/:id ───────────────────────────────────────────────────────
@@ -129,6 +163,36 @@ describe("PUT /incubation/:id", () => {
       .set("x-farm-id", farmId)
       .send({ eggCount: 0 });
     expect(res.status).toBe(400);
+  });
+
+  it("returns 400 when updating hatch date to before the stored start date", async () => {
+    const farmId = await createFarm();
+    const created = await createBatch(farmId); // start 2026-01-01
+    const res = await request(app)
+      .put(`/incubation/${created.body._id}`)
+      .set("x-farm-id", farmId)
+      .send({ expectedHatchDate: "2025-01-01" });
+    expect(res.status).toBe(400);
+  });
+
+  it("returns 400 when updating start date to after the stored hatch date", async () => {
+    const farmId = await createFarm();
+    const created = await createBatch(farmId); // hatch 2026-01-22
+    const res = await request(app)
+      .put(`/incubation/${created.body._id}`)
+      .set("x-farm-id", farmId)
+      .send({ startDate: "2026-06-01" });
+    expect(res.status).toBe(400);
+  });
+
+  it("allows updating both dates together to a valid range", async () => {
+    const farmId = await createFarm();
+    const created = await createBatch(farmId);
+    const res = await request(app)
+      .put(`/incubation/${created.body._id}`)
+      .set("x-farm-id", farmId)
+      .send({ startDate: "2026-03-01", expectedHatchDate: "2026-03-21" });
+    expect(res.status).toBe(200);
   });
 });
 
