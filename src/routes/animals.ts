@@ -2,6 +2,7 @@ import { Router } from "express";
 import mongoose from "mongoose";
 import { AnimalModel } from "../models/Animal";
 import { getFarmIdFromRequest } from "../utils/farmContext";
+import { serverError, stripImmutableFields } from "../utils/http";
 import { farmExists, validateAnimalParents } from "../utils/validation";
 
 export const animalsRouter = Router();
@@ -12,9 +13,9 @@ animalsRouter.get("/", async (req, res) => {
 
   try {
     const animals = await AnimalModel.find({ farmId }).sort({ createdAt: -1 }).lean();
-    res.json(animals);
+    return res.json(animals);
   } catch (error) {
-    res.status(500).json({ message: "Internal server error" });
+    return serverError(res);
   }
 });
 
@@ -44,7 +45,7 @@ animalsRouter.post("/", async (req, res) => {
     const created = await AnimalModel.create({ ...rest, ...parents.resolved, farmId });
     return res.status(201).json(created);
   } catch (error) {
-    return res.status(400).json({ message: "Invalid animal payload", error });
+    return res.status(400).json({ message: "Invalid animal payload" });
   }
 });
 
@@ -52,7 +53,7 @@ animalsRouter.put("/:id", async (req, res) => {
   const farmId = getFarmIdFromRequest(req, res);
   if (!farmId) return;
 
-  const { _id, farmId: _farmId, createdAt, updatedAt, fatherId, motherId, ...rest } = req.body;
+  const { fatherId, motherId, ...rest } = stripImmutableFields(req.body);
 
   try {
     // The offspring's type may come from the update body, or fall back to the
@@ -75,7 +76,7 @@ animalsRouter.put("/:id", async (req, res) => {
     if (!updated) return res.status(404).json({ message: "Animal not found" });
     return res.json(updated);
   } catch (error) {
-    return res.status(400).json({ message: "Invalid update payload", error });
+    return res.status(400).json({ message: "Invalid update payload" });
   }
 });
 
@@ -128,6 +129,6 @@ animalsRouter.get("/:id/tree", async (req, res) => {
     if (!tree) return res.status(404).json({ message: "Animal not found" });
     return res.json(tree);
   } catch (error) {
-    return res.status(500).json({ message: "Internal server error" });
+    return serverError(res);
   }
 });

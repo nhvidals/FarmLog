@@ -2,6 +2,7 @@ import { Router } from "express";
 import { AnimalModel } from "../models/Animal";
 import { MedicationScheduleModel } from "../models/MedicationSchedule";
 import { getFarmIdFromRequest } from "../utils/farmContext";
+import { serverError, stripImmutableFields } from "../utils/http";
 import { farmExists } from "../utils/validation";
 
 export const medicationRouter = Router();
@@ -15,9 +16,9 @@ medicationRouter.get("/", async (req, res) => {
       .populate("animalId", "name designation ringNumber")
       .sort({ date: 1 })
       .lean();
-    res.json(entries);
+    return res.json(entries);
   } catch (error) {
-    res.status(500).json({ message: "Internal server error" });
+    return serverError(res);
   }
 });
 
@@ -34,7 +35,7 @@ medicationRouter.post("/", async (req, res) => {
     const created = await MedicationScheduleModel.create({ ...req.body, farmId });
     return res.status(201).json(created);
   } catch (error) {
-    return res.status(400).json({ message: "Invalid medication payload", error });
+    return res.status(400).json({ message: "Invalid medication payload" });
   }
 });
 
@@ -42,7 +43,7 @@ medicationRouter.put("/:id", async (req, res) => {
   const farmId = getFarmIdFromRequest(req, res);
   if (!farmId) return;
 
-  const { _id, farmId: _farmId, createdAt, updatedAt, ...safeBody } = req.body;
+  const safeBody = stripImmutableFields(req.body);
 
   try {
     if (safeBody.animalId) {
@@ -59,7 +60,7 @@ medicationRouter.put("/:id", async (req, res) => {
     if (!updated) return res.status(404).json({ message: "Schedule not found" });
     return res.json(updated);
   } catch (error) {
-    return res.status(400).json({ message: "Invalid update payload", error });
+    return res.status(400).json({ message: "Invalid update payload" });
   }
 });
 

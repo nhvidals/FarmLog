@@ -4,15 +4,16 @@ import { AnimalModel } from "../models/Animal";
 import { AnimalTypeModel } from "../models/AnimalType";
 import { IncubationBatchModel } from "../models/IncubationBatch";
 import { MedicationScheduleModel } from "../models/MedicationSchedule";
+import { serverError } from "../utils/http";
 
 export const farmsRouter = Router();
 
 farmsRouter.get("/", async (_req, res) => {
   try {
     const farms = await FarmModel.find().sort({ createdAt: -1 }).lean();
-    res.json(farms);
+    return res.json(farms);
   } catch (error) {
-    res.status(500).json({ message: "Internal server error" });
+    return serverError(res);
   }
 });
 
@@ -24,7 +25,7 @@ farmsRouter.post("/", async (req, res) => {
     });
     return res.status(201).json(created);
   } catch (error) {
-    return res.status(400).json({ message: "Invalid farm payload", error });
+    return res.status(400).json({ message: "Invalid farm payload" });
   }
 });
 
@@ -43,6 +44,6 @@ farmsRouter.delete("/:id", async (req, res) => {
 
     return res.status(204).send();
   } catch (error) {
-    return res.status(500).json({ message: "Internal server error" });
+    return serverError(res);
   }
 });

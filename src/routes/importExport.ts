@@ -4,6 +4,7 @@ import { AnimalTypeModel } from "../models/AnimalType";
 import { IncubationBatchModel } from "../models/IncubationBatch";
 import { MedicationScheduleModel } from "../models/MedicationSchedule";
 import { getFarmIdFromRequest } from "../utils/farmContext";
+import { serverError, stripImmutableFields } from "../utils/http";
 
 export const importExportRouter = Router();
 
@@ -28,9 +29,9 @@ importExportRouter.get("/export", async (req, res) => {
       MedicationScheduleModel.find({ farmId }).lean()
     ]);
 
-    res.json({ exportedAt: new Date().toISOString(), farmId, animalTypes, animals, incubation, medication });
+    return res.json({ exportedAt: new Date().toISOString(), farmId, animalTypes, animals, incubation, medication });
   } catch (error) {
-    res.status(500).json({ message: "Internal server error" });
+    return serverError(res);
   }
 });
 
@@ -49,10 +50,7 @@ importExportRouter.post("/import", async (req, res) => {
     return res.status(400).json({ message: "Invalid import payload" });
   }
 
-  const strip = (entry: unknown) => {
-    const { _id, farmId: _f, createdAt, updatedAt, ...rest } = entry as Record<string, unknown>;
-    return { ...rest, farmId };
-  };
+  const strip = (entry: unknown) => ({ ...stripImmutableFields(entry), farmId });
 
   const animalTypes = Array.isArray(payload.animalTypes) ? payload.animalTypes.map(strip) : [];
   const animals = Array.isArray(payload.animals) ? payload.animals.map(strip) : [];
@@ -78,7 +76,7 @@ importExportRouter.post("/import", async (req, res) => {
       medication.length > 0 ? MedicationScheduleModel.insertMany(medication, { ordered: false }) : Promise.resolve()
     ]);
   } catch (error) {
-    return res.status(400).json({ message: "Import failed", error });
+    return res.status(400).json({ message: "Import failed" });
   }
 
   return res.status(201).json({

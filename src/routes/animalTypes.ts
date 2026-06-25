@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { AnimalTypeModel } from "../models/AnimalType";
 import { getFarmIdFromRequest } from "../utils/farmContext";
+import { serverError } from "../utils/http";
 import { farmExists } from "../utils/validation";
 
 export const animalTypesRouter = Router();
@@ -11,9 +12,9 @@ animalTypesRouter.get("/", async (req, res) => {
 
   try {
     const types = await AnimalTypeModel.find({ farmId }).sort({ name: 1 }).lean();
-    res.json(types);
+    return res.json(types);
   } catch (error) {
-    res.status(500).json({ message: "Internal server error" });
+    return serverError(res);
   }
 });
 
@@ -31,7 +32,7 @@ animalTypesRouter.post("/", async (req, res) => {
     });
     return res.status(201).json(created);
   } catch (error) {
-    return res.status(400).json({ message: "Invalid animal type payload", error });
+    return res.status(400).json({ message: "Invalid animal type payload" });
   }
 });
 

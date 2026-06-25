@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { IncubationBatchModel } from "../models/IncubationBatch";
 import { getFarmIdFromRequest } from "../utils/farmContext";
+import { serverError, stripImmutableFields } from "../utils/http";
 import { farmExists, validateHatchOrder } from "../utils/validation";
 
 export const incubationRouter = Router();
@@ -11,9 +12,9 @@ incubationRouter.get("/", async (req, res) => {
 
   try {
     const batches = await IncubationBatchModel.find({ farmId }).sort({ startDate: -1 }).lean();
-    res.json(batches);
+    return res.json(batches);
   } catch (error) {
-    res.status(500).json({ message: "Internal server error" });
+    return serverError(res);
   }
 });
 
@@ -30,7 +31,7 @@ incubationRouter.post("/", async (req, res) => {
     const created = await IncubationBatchModel.create({ ...req.body, farmId });
     return res.status(201).json(created);
   } catch (error) {
-    return res.status(400).json({ message: "Invalid incubation payload", error });
+    return res.status(400).json({ message: "Invalid incubation payload" });
   }
 });
 
@@ -38,7 +39,7 @@ incubationRouter.put("/:id", async (req, res) => {
   const farmId = getFarmIdFromRequest(req, res);
   if (!farmId) return;
 
-  const { _id, farmId: _farmId, createdAt, updatedAt, ...safeBody } = req.body;
+  const safeBody = stripImmutableFields(req.body);
 
   try {
     if (safeBody.startDate !== undefined || safeBody.expectedHatchDate !== undefined) {
@@ -60,7 +61,7 @@ incubationRouter.put("/:id", async (req, res) => {
     if (!updated) return res.status(404).json({ message: "Batch not found" });
     return res.json(updated);
   } catch (error) {
-    return res.status(400).json({ message: "Invalid update payload", error });
+    return res.status(400).json({ message: "Invalid update payload" });
   }
 });
 
