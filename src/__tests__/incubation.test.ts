@@ -144,6 +144,28 @@ describe("PUT /incubation/:id", () => {
     expect(res.status).toBe(404);
   });
 
+  it("stores the incubation outcome (hatchedOk / hatchedNok)", async () => {
+    const farmId = await createFarm();
+    const created = await createBatch(farmId);
+    const res = await request(app)
+      .put(`/incubation/${created.body._id}`)
+      .set("x-farm-id", farmId)
+      .send({ hatchedOk: 9, hatchedNok: 3 });
+    expect(res.status).toBe(200);
+    expect(res.body.hatchedOk).toBe(9);
+    expect(res.body.hatchedNok).toBe(3);
+  });
+
+  it("returns 400 for a negative outcome value", async () => {
+    const farmId = await createFarm();
+    const created = await createBatch(farmId);
+    const res = await request(app)
+      .put(`/incubation/${created.body._id}`)
+      .set("x-farm-id", farmId)
+      .send({ hatchedOk: -1 });
+    expect(res.status).toBe(400);
+  });
+
   it("returns 404 for batch belonging to another farm", async () => {
     const farmId1 = await createFarm();
     const farmId2 = await createFarm();

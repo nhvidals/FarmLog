@@ -8,6 +8,8 @@ export interface IncubationBatch {
   incubatorName: string;
   startDate: Date;
   expectedHatchDate: Date;
+  hatchedOk?: number;
+  hatchedNok?: number;
   notes?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -21,6 +23,8 @@ const incubationBatchSchema = new Schema<IncubationBatch>(
     incubatorName: { type: String, required: true, trim: true },
     startDate: { type: Date, required: true },
     expectedHatchDate: { type: Date, required: true },
+    hatchedOk: { type: Number, min: 0 },
+    hatchedNok: { type: Number, min: 0 },
     notes: { type: String }
   },
   { timestamps: true }
