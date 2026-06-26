@@ -1,3 +1,4 @@
+import "dotenv/config";
 import mongoose from "mongoose";
 import { app } from "./app";
 
@@ -6,9 +7,21 @@ const mongoUri = process.env.MONGODB_URI ?? "mongodb://localhost:27017/farm_anim
 
 async function start() {
   await mongoose.connect(mongoUri);
-  app.listen(port, () => {
+  const server = app.listen(port, () => {
     console.log(`API listening on port ${port}`);
   });
+
+  // Graceful shutdown: stop accepting connections, then close the DB.
+  const shutdown = async (signal: string) => {
+    console.log(`${signal} received, shutting down...`);
+    server.close(async () => {
+      await mongoose.disconnect();
+      process.exit(0);
+    });
+  };
+
+  process.on("SIGTERM", () => void shutdown("SIGTERM"));
+  process.on("SIGINT", () => void shutdown("SIGINT"));
 }
 
 start().catch((error) => {
