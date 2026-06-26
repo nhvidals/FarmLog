@@ -2,7 +2,6 @@ import { Router } from "express";
 import { AnimalTypeModel } from "../models/AnimalType";
 import { getFarmIdFromRequest } from "../utils/farmContext";
 import { serverError } from "../utils/http";
-import { farmExists } from "../utils/validation";
 
 export const animalTypesRouter = Router();
 
@@ -23,8 +22,6 @@ animalTypesRouter.post("/", async (req, res) => {
   if (!farmId) return;
 
   try {
-    if (!(await farmExists(farmId))) return res.status(404).json({ message: "Farm not found" });
-
     const created = await AnimalTypeModel.create({
       name: req.body?.name,
       category: req.body?.category,

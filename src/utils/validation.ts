@@ -1,13 +1,7 @@
 import { Types } from "mongoose";
-import { FarmModel } from "../models/Farm";
 import { AnimalModel } from "../models/Animal";
 
 export type ValidationError = { message: string };
-
-/** True when a farm document with the given id exists. */
-export async function farmExists(farmId: string): Promise<boolean> {
-  return Boolean(await FarmModel.exists({ _id: farmId }));
-}
 
 export type ParentResolution = {
   /** Resolved parent object ids, keyed only for parents that were provided. */

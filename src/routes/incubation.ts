@@ -2,7 +2,7 @@ import { Router } from "express";
 import { IncubationBatchModel } from "../models/IncubationBatch";
 import { getFarmIdFromRequest } from "../utils/farmContext";
 import { serverError, stripImmutableFields } from "../utils/http";
-import { farmExists, validateHatchOrder } from "../utils/validation";
+import { validateHatchOrder } from "../utils/validation";
 
 export const incubationRouter = Router();
 
@@ -23,8 +23,6 @@ incubationRouter.post("/", async (req, res) => {
   if (!farmId) return;
 
   try {
-    if (!(await farmExists(farmId))) return res.status(404).json({ message: "Farm not found" });
-
     const dateError = validateHatchOrder(req.body?.startDate, req.body?.expectedHatchDate);
     if (dateError) return res.status(400).json({ message: dateError.message });
 

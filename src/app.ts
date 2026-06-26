@@ -33,6 +33,16 @@ app.use(
   })
 );
 
+// Stricter limit on auth endpoints to slow credential brute force. Relaxed in
+// tests, where the suite legitimately makes many auth calls from one IP.
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: process.env.NODE_ENV === "test" ? 100000 : Number(process.env.AUTH_RATE_LIMIT_MAX ?? 10),
+  standardHeaders: "draft-7",
+  legacyHeaders: false,
+  message: { message: "Too many attempts, please try again later" }
+});
+
 // Request logging (skipped during tests to keep output clean).
 if (process.env.NODE_ENV !== "test") {
   app.use(morgan("tiny"));
@@ -46,8 +56,8 @@ app.get("/health", (_req, res) => {
   res.status(dbConnected ? 200 : 503).json({ ok: dbConnected, db: dbConnected ? "up" : "down" });
 });
 
-// Public auth endpoints.
-app.use("/auth", authRouter);
+// Public auth endpoints (rate-limited).
+app.use("/auth", authLimiter, authRouter);
 
 // Everything below requires a valid bearer token.
 app.use("/farms", authRequired, farmsRouter);

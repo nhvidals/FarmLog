@@ -23,14 +23,17 @@ authRouter.post("/register", async (req, res) => {
   }
 
   try {
-    const existing = await UserModel.exists({ email: creds.email });
-    if (existing) return res.status(409).json({ message: "Email already registered" });
-
     const passwordHash = await bcrypt.hash(creds.password, 10);
     const user = await UserModel.create({ email: creds.email, passwordHash });
     const token = signToken(String(user._id));
     return res.status(201).json({ token, user: { id: user._id, email: user.email } });
   } catch (error) {
+    // The unique index on email is the source of truth: a concurrent or repeat
+    // registration surfaces here as a duplicate-key error rather than via a
+    // racy pre-check.
+    if ((error as { code?: number }).code === 11000) {
+      return res.status(409).json({ message: "Email already registered" });
+    }
     return serverError(res);
   }
 });

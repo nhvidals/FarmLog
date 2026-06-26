@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import { AnimalModel } from "../models/Animal";
 import { getFarmIdFromRequest } from "../utils/farmContext";
 import { serverError, stripImmutableFields } from "../utils/http";
-import { farmExists, validateAnimalParents } from "../utils/validation";
+import { validateAnimalParents } from "../utils/validation";
 
 export const animalsRouter = Router();
 
@@ -37,8 +37,6 @@ animalsRouter.post("/", async (req, res) => {
   if (!farmId) return;
 
   try {
-    if (!(await farmExists(farmId))) return res.status(404).json({ message: "Farm not found" });
-
     const { fatherId, motherId, ...rest } = req.body ?? {};
     const parents = await validateAnimalParents({ fatherId, motherId }, farmId, undefined, rest.designation);
 
