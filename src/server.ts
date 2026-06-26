@@ -5,6 +5,11 @@ import { app } from "./app";
 const port = Number(process.env.PORT ?? 4000);
 const mongoUri = process.env.MONGODB_URI ?? "mongodb://localhost:27017/farm_animals";
 
+if (!process.env.JWT_SECRET) {
+  console.error("JWT_SECRET is not set — refusing to start. Set it in your environment or .env file.");
+  process.exit(1);
+}
+
 async function start() {
   await mongoose.connect(mongoUri);
   const server = app.listen(port, () => {

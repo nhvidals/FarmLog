@@ -3,6 +3,7 @@ import { Types } from "mongoose";
 import { app } from "../app";
 import { FarmModel } from "../models/Farm";
 import { connect, disconnect, clearDatabase } from "./setup";
+import { TEST_OWNER_ID } from "./testAuth";
 
 beforeAll(connect);
 afterAll(disconnect);
@@ -17,7 +18,7 @@ const baseBatch = () => ({
 });
 
 async function createFarm() {
-  const farm = await FarmModel.create({ name: "Test Farm" });
+  const farm = await FarmModel.create({ name: "Test Farm", ownerId: TEST_OWNER_ID });
   return farm._id.toString();
 }
 

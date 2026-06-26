@@ -63,24 +63,40 @@ The API starts on `http://localhost:4000` by default.
 
 ### Endpoints
 
-| Method | Path | Description |
-|--------|------|-------------|
-| GET / POST | `/farms` | List / create farms |
-| GET / POST / PUT / DELETE | `/animals` | Animal CRUD |
-| GET | `/animals/:id/tree` | Genealogy tree |
-| GET / POST / PUT / DELETE | `/incubation` | Incubation batch CRUD |
-| GET / POST / PUT / DELETE | `/medication` | Medication schedule CRUD |
-| GET | `/data/export` | Export farm data as JSON |
-| POST | `/data/import` | Import JSON data into a farm |
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| POST | `/auth/register` | public | Create an account, returns a JWT |
+| POST | `/auth/login` | public | Log in, returns a JWT |
+| GET / POST / DELETE | `/farms` | required | List / create / delete the caller's farms |
+| GET / POST / PUT / DELETE | `/animals` | required | Animal CRUD |
+| GET | `/animals/:id/tree` | required | Genealogy tree |
+| GET / POST / PUT / DELETE | `/incubation` | required | Incubation batch CRUD |
+| GET / POST / PUT / DELETE | `/medication` | required | Medication schedule CRUD |
+| GET | `/data/export` | required | Export farm data as JSON |
+| POST | `/data/import` | required | Import JSON data into a farm |
+
+### Authentication
+
+All endpoints except `/auth/*` and `/health` require a bearer token:
+
+```
+Authorization: Bearer <jwt>
+```
+
+Obtain a token from `POST /auth/register` or `POST /auth/login`. Tokens are signed
+with `JWT_SECRET` (required env var) and expire after `JWT_TTL` (default 30 days).
 
 ### Multi-farm
 
-All data endpoints require a `farmId`, supplied as:
+Each farm is owned by the user who created it; users only ever see and modify
+their own farms. Data endpoints additionally take a `farmId`, supplied as:
 
 - Header: `x-farm-id: <id>`
 - Query param: `?farmId=<id>`
 
-The mobile app sends it automatically based on the active farm selected in the UI.
+The server verifies the authenticated user owns that farm and returns `404` for
+farms that don't exist **or** belong to another user. The mobile app sends both
+the token and the active farm id automatically.
 
 ---
 

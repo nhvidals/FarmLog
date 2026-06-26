@@ -10,6 +10,8 @@ import { incubationRouter } from "./routes/incubation";
 import { medicationRouter } from "./routes/medication";
 import { importExportRouter } from "./routes/importExport";
 import { farmsRouter } from "./routes/farms";
+import { authRouter } from "./routes/auth";
+import { authRequired } from "./middleware/auth";
 
 export const app = express();
 
@@ -44,9 +46,13 @@ app.get("/health", (_req, res) => {
   res.status(dbConnected ? 200 : 503).json({ ok: dbConnected, db: dbConnected ? "up" : "down" });
 });
 
-app.use("/farms", farmsRouter);
-app.use("/animal-types", animalTypesRouter);
-app.use("/animals", animalsRouter);
-app.use("/incubation", incubationRouter);
-app.use("/medication", medicationRouter);
-app.use("/data", importExportRouter);
+// Public auth endpoints.
+app.use("/auth", authRouter);
+
+// Everything below requires a valid bearer token.
+app.use("/farms", authRequired, farmsRouter);
+app.use("/animal-types", authRequired, animalTypesRouter);
+app.use("/animals", authRequired, animalsRouter);
+app.use("/incubation", authRequired, incubationRouter);
+app.use("/medication", authRequired, medicationRouter);
+app.use("/data", authRequired, importExportRouter);

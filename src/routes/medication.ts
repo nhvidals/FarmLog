@@ -8,7 +8,7 @@ import { farmExists } from "../utils/validation";
 export const medicationRouter = Router();
 
 medicationRouter.get("/", async (req, res) => {
-  const farmId = getFarmIdFromRequest(req, res);
+  const farmId = await getFarmIdFromRequest(req, res);
   if (!farmId) return;
 
   try {
@@ -23,7 +23,7 @@ medicationRouter.get("/", async (req, res) => {
 });
 
 medicationRouter.post("/", async (req, res) => {
-  const farmId = getFarmIdFromRequest(req, res);
+  const farmId = await getFarmIdFromRequest(req, res);
   if (!farmId) return;
 
   try {
@@ -40,7 +40,7 @@ medicationRouter.post("/", async (req, res) => {
 });
 
 medicationRouter.put("/:id", async (req, res) => {
-  const farmId = getFarmIdFromRequest(req, res);
+  const farmId = await getFarmIdFromRequest(req, res);
   if (!farmId) return;
 
   const safeBody = stripImmutableFields(req.body);
@@ -65,7 +65,7 @@ medicationRouter.put("/:id", async (req, res) => {
 });
 
 medicationRouter.delete("/:id", async (req, res) => {
-  const farmId = getFarmIdFromRequest(req, res);
+  const farmId = await getFarmIdFromRequest(req, res);
   if (!farmId) return;
 
   try {

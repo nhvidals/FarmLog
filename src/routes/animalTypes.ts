@@ -7,7 +7,7 @@ import { farmExists } from "../utils/validation";
 export const animalTypesRouter = Router();
 
 animalTypesRouter.get("/", async (req, res) => {
-  const farmId = getFarmIdFromRequest(req, res);
+  const farmId = await getFarmIdFromRequest(req, res);
   if (!farmId) return;
 
   try {
@@ -19,7 +19,7 @@ animalTypesRouter.get("/", async (req, res) => {
 });
 
 animalTypesRouter.post("/", async (req, res) => {
-  const farmId = getFarmIdFromRequest(req, res);
+  const farmId = await getFarmIdFromRequest(req, res);
   if (!farmId) return;
 
   try {
@@ -37,7 +37,7 @@ animalTypesRouter.post("/", async (req, res) => {
 });
 
 animalTypesRouter.delete("/:id", async (req, res) => {
-  const farmId = getFarmIdFromRequest(req, res);
+  const farmId = await getFarmIdFromRequest(req, res);
   if (!farmId) return;
 
   try {

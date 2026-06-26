@@ -2,13 +2,14 @@ import request from "supertest";
 import { app } from "../app";
 import { FarmModel } from "../models/Farm";
 import { connect, disconnect, clearDatabase } from "./setup";
+import { TEST_OWNER_ID } from "./testAuth";
 
 beforeAll(connect);
 afterAll(disconnect);
 beforeEach(clearDatabase);
 
 async function createFarm(name = "Test Farm") {
-  const farm = await FarmModel.create({ name });
+  const farm = await FarmModel.create({ name, ownerId: TEST_OWNER_ID });
   return farm._id.toString();
 }
 

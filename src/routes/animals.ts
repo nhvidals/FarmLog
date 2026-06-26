@@ -8,7 +8,7 @@ import { farmExists, validateAnimalParents } from "../utils/validation";
 export const animalsRouter = Router();
 
 animalsRouter.get("/", async (req, res) => {
-  const farmId = getFarmIdFromRequest(req, res);
+  const farmId = await getFarmIdFromRequest(req, res);
   if (!farmId) return;
 
   try {
@@ -20,7 +20,7 @@ animalsRouter.get("/", async (req, res) => {
 });
 
 animalsRouter.get("/:id", async (req, res) => {
-  const farmId = getFarmIdFromRequest(req, res);
+  const farmId = await getFarmIdFromRequest(req, res);
   if (!farmId) return;
 
   try {
@@ -33,7 +33,7 @@ animalsRouter.get("/:id", async (req, res) => {
 });
 
 animalsRouter.post("/", async (req, res) => {
-  const farmId = getFarmIdFromRequest(req, res);
+  const farmId = await getFarmIdFromRequest(req, res);
   if (!farmId) return;
 
   try {
@@ -50,7 +50,7 @@ animalsRouter.post("/", async (req, res) => {
 });
 
 animalsRouter.put("/:id", async (req, res) => {
-  const farmId = getFarmIdFromRequest(req, res);
+  const farmId = await getFarmIdFromRequest(req, res);
   if (!farmId) return;
 
   const { fatherId, motherId, ...rest } = stripImmutableFields(req.body);
@@ -81,7 +81,7 @@ animalsRouter.put("/:id", async (req, res) => {
 });
 
 animalsRouter.delete("/:id", async (req, res) => {
-  const farmId = getFarmIdFromRequest(req, res);
+  const farmId = await getFarmIdFromRequest(req, res);
   if (!farmId) return;
 
   try {
@@ -94,7 +94,7 @@ animalsRouter.delete("/:id", async (req, res) => {
 });
 
 animalsRouter.get("/:id/tree", async (req, res) => {
-  const farmId = getFarmIdFromRequest(req, res);
+  const farmId = await getFarmIdFromRequest(req, res);
   if (!farmId) return;
 
   const visited = new Set<string>();

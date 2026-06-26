@@ -18,7 +18,7 @@ function isValidDateValue(value: unknown): boolean {
 }
 
 importExportRouter.get("/export", async (req, res) => {
-  const farmId = getFarmIdFromRequest(req, res);
+  const farmId = await getFarmIdFromRequest(req, res);
   if (!farmId) return;
 
   try {
@@ -36,7 +36,7 @@ importExportRouter.get("/export", async (req, res) => {
 });
 
 importExportRouter.post("/import", async (req, res) => {
-  const farmId = getFarmIdFromRequest(req, res);
+  const farmId = await getFarmIdFromRequest(req, res);
   if (!farmId) return;
 
   const payload = req.body as {

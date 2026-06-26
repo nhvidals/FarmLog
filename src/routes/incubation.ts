@@ -7,7 +7,7 @@ import { farmExists, validateHatchOrder } from "../utils/validation";
 export const incubationRouter = Router();
 
 incubationRouter.get("/", async (req, res) => {
-  const farmId = getFarmIdFromRequest(req, res);
+  const farmId = await getFarmIdFromRequest(req, res);
   if (!farmId) return;
 
   try {
@@ -19,7 +19,7 @@ incubationRouter.get("/", async (req, res) => {
 });
 
 incubationRouter.post("/", async (req, res) => {
-  const farmId = getFarmIdFromRequest(req, res);
+  const farmId = await getFarmIdFromRequest(req, res);
   if (!farmId) return;
 
   try {
@@ -36,7 +36,7 @@ incubationRouter.post("/", async (req, res) => {
 });
 
 incubationRouter.put("/:id", async (req, res) => {
-  const farmId = getFarmIdFromRequest(req, res);
+  const farmId = await getFarmIdFromRequest(req, res);
   if (!farmId) return;
 
   const safeBody = stripImmutableFields(req.body);
@@ -66,7 +66,7 @@ incubationRouter.put("/:id", async (req, res) => {
 });
 
 incubationRouter.delete("/:id", async (req, res) => {
-  const farmId = getFarmIdFromRequest(req, res);
+  const farmId = await getFarmIdFromRequest(req, res);
   if (!farmId) return;
 
   try {

@@ -8,9 +8,9 @@ import { serverError } from "../utils/http";
 
 export const farmsRouter = Router();
 
-farmsRouter.get("/", async (_req, res) => {
+farmsRouter.get("/", async (req, res) => {
   try {
-    const farms = await FarmModel.find().sort({ createdAt: -1 }).lean();
+    const farms = await FarmModel.find({ ownerId: req.userId }).sort({ createdAt: -1 }).lean();
     return res.json(farms);
   } catch (error) {
     return serverError(res);
@@ -20,6 +20,7 @@ farmsRouter.get("/", async (_req, res) => {
 farmsRouter.post("/", async (req, res) => {
   try {
     const created = await FarmModel.create({
+      ownerId: req.userId,
       name: req.body?.name,
       location: req.body?.location
     });
@@ -31,7 +32,7 @@ farmsRouter.post("/", async (req, res) => {
 
 farmsRouter.delete("/:id", async (req, res) => {
   try {
-    const farm = await FarmModel.findByIdAndDelete(req.params.id);
+    const farm = await FarmModel.findOneAndDelete({ _id: req.params.id, ownerId: req.userId });
     if (!farm) return res.status(404).json({ message: "Farm not found" });
 
     const farmId = req.params.id;
