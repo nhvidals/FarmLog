@@ -28,7 +28,12 @@ jest.mock("../src/api", () => ({
 async function signIn() {
   const screen = render(<App />);
   // Wait for the bootstrap session check to resolve and the login form to render.
-  fireEvent.changeText(await screen.findByTestId("login-email"), "owner@example.com");
+  // The cold first render on slower CI runners can exceed the default 1s findBy
+  // timeout, so allow extra time here.
+  fireEvent.changeText(
+    await screen.findByTestId("login-email", {}, { timeout: 10000 }),
+    "owner@example.com",
+  );
   fireEvent.changeText(screen.getByTestId("login-password"), "supersecret1");
   fireEvent.press(screen.getByTestId("login-submit"));
   await waitFor(() => {
