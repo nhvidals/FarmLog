@@ -3,6 +3,7 @@ import { Types } from "mongoose";
 import { app } from "../app";
 import { FarmModel } from "../models/Farm";
 import { AnimalModel } from "../models/Animal";
+import { AnimalTypeModel } from "../models/AnimalType";
 import { connect, disconnect, clearDatabase } from "./setup";
 import { TEST_OWNER_ID } from "./testAuth";
 
@@ -159,9 +160,12 @@ describe("Farm deletion removes its animal types", () => {
       ringNumber: "R001",
     });
 
-    await request(app).delete(`/farms/${farmId}`);
+    const del = await request(app).delete(`/farms/${farmId}`);
+    expect(del.status).toBe(204);
 
-    const res = await request(app).get("/animal-types").set("x-farm-id", farmId);
-    expect(res.body).toEqual([]);
+    // The farm no longer exists, so the API would 404; assert the cascade
+    // removed the farm's types (and animals) by inspecting the collections.
+    expect(await AnimalTypeModel.countDocuments({ farmId })).toBe(0);
+    expect(await AnimalModel.countDocuments({ farmId })).toBe(0);
   });
 });
