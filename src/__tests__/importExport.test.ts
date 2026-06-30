@@ -122,7 +122,7 @@ describe("POST /data/import", () => {
     const targetFarmId = await createFarm("Target Farm");
 
     const animal = await createAnimal(sourceFarmId, "R001");
-    const batch = await createBatch(sourceFarmId);
+    await createBatch(sourceFarmId);
     const med = await createMedication(sourceFarmId, animal._id);
 
     const exported = await request(app).get("/data/export").set("x-farm-id", sourceFarmId);
