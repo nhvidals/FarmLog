@@ -182,6 +182,61 @@ export const translations = {
       "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
     ],
 
+    // Date picker
+    pickDate: "Escolher data",
+    clear: "Limpar",
+
+    // Search / filter / sort
+    searchPlaceholder: "Procurar por nome, anilha ou tipo...",
+    filterAll: "Todos",
+    sortLabel: "Ordenar",
+    sortNewest: "Recentes",
+    sortName: "Nome",
+    sortRing: "Anilha",
+    noResults: "Nenhum animal corresponde aos filtros.",
+    resultsCount: "{n} de {total}",
+
+    // Lifecycle status
+    statusLabel: "Estado",
+    statusDateLabel: "Data do estado",
+    statusReasonPlaceholder: "Motivo (opcional)",
+
+    // Dashboard
+    tabHome: "Inicio",
+    dashHello: "Ola",
+    dashOverview: "Resumo da quinta",
+    dashAnimalsTotal: "Animais",
+    dashActive: "Ativos",
+    dashTypesTotal: "Tipos",
+    dashIncubating: "Em incubacao",
+    dashUpcoming: "Proximos 7 dias",
+    dashNoUpcoming: "Sem eventos nos proximos 7 dias.",
+    dashSelectFarm: "Selecione ou crie uma quinta para comecar.",
+    dashQuickAdd: "Adicionar animal",
+
+    // Loading / error
+    loading: "A carregar...",
+    retry: "Tentar novamente",
+
+    // Members / roles
+    manageMembers: "Gerir membros",
+    membersTitle: "Membros da quinta",
+    addMember: "Adicionar membro",
+    memberEmailPlaceholder: "Email do utilizador",
+    memberRoleLabel: "Funcao",
+    noOtherMembers: "Sem outros membros.",
+    successMemberAdded: "Membro adicionado.",
+    successMemberRemoved: "Membro removido.",
+    successRoleChanged: "Funcao atualizada.",
+    errAddMember: "Nao foi possivel adicionar o membro.",
+    errMemberNotFound: "Nenhum utilizador com esse email.",
+    errRemoveMember: "Nao foi possivel remover o membro.",
+    errChangeRole: "Nao foi possivel alterar a funcao.",
+    confirmRemoveMemberTitle: "Remover membro",
+    confirmRemoveMemberMsg: "Remover \"{name}\" desta quinta?",
+    readOnlyBanner: "A sua funcao e apenas de leitura nesta quinta.",
+    remove: "Remover",
+
     sexLabels: {
       male: "Macho",
       female: "Femea",
@@ -189,6 +244,16 @@ export const translations = {
     categoryLabels: {
       oviparous: "Oviparo",
       viviparous: "Viviparo",
+    },
+    statusLabels: {
+      active: "Ativo",
+      sold: "Vendido",
+      deceased: "Falecido",
+    },
+    roleLabels: {
+      owner: "Proprietario",
+      worker: "Trabalhador",
+      vet: "Veterinario",
     },
   },
   en: {
@@ -372,6 +437,61 @@ export const translations = {
       "July", "August", "September", "October", "November", "December",
     ],
 
+    // Date picker
+    pickDate: "Pick a date",
+    clear: "Clear",
+
+    // Search / filter / sort
+    searchPlaceholder: "Search by name, ring or type...",
+    filterAll: "All",
+    sortLabel: "Sort",
+    sortNewest: "Newest",
+    sortName: "Name",
+    sortRing: "Ring",
+    noResults: "No animals match your filters.",
+    resultsCount: "{n} of {total}",
+
+    // Lifecycle status
+    statusLabel: "Status",
+    statusDateLabel: "Status date",
+    statusReasonPlaceholder: "Reason (optional)",
+
+    // Dashboard
+    tabHome: "Home",
+    dashHello: "Hi",
+    dashOverview: "Farm overview",
+    dashAnimalsTotal: "Animals",
+    dashActive: "Active",
+    dashTypesTotal: "Types",
+    dashIncubating: "Incubating",
+    dashUpcoming: "Next 7 days",
+    dashNoUpcoming: "No events in the next 7 days.",
+    dashSelectFarm: "Select or create a farm to get started.",
+    dashQuickAdd: "Add animal",
+
+    // Loading / error
+    loading: "Loading...",
+    retry: "Retry",
+
+    // Members / roles
+    manageMembers: "Manage members",
+    membersTitle: "Farm members",
+    addMember: "Add member",
+    memberEmailPlaceholder: "User email",
+    memberRoleLabel: "Role",
+    noOtherMembers: "No other members.",
+    successMemberAdded: "Member added.",
+    successMemberRemoved: "Member removed.",
+    successRoleChanged: "Role updated.",
+    errAddMember: "Could not add the member.",
+    errMemberNotFound: "No user with that email.",
+    errRemoveMember: "Could not remove the member.",
+    errChangeRole: "Could not change the role.",
+    confirmRemoveMemberTitle: "Remove member",
+    confirmRemoveMemberMsg: "Remove \"{name}\" from this farm?",
+    readOnlyBanner: "Your role is read-only on this farm.",
+    remove: "Remove",
+
     sexLabels: {
       male: "Male",
       female: "Female",
@@ -379,6 +499,16 @@ export const translations = {
     categoryLabels: {
       oviparous: "Oviparous",
       viviparous: "Viviparous",
+    },
+    statusLabels: {
+      active: "Active",
+      sold: "Sold",
+      deceased: "Deceased",
+    },
+    roleLabels: {
+      owner: "Owner",
+      worker: "Worker",
+      vet: "Vet",
     },
   },
 } as const;

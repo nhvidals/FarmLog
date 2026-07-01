@@ -30,10 +30,10 @@ const addDays = (d: Date, n: number) => {
 const startOfWeek = (d: Date) => addDays(d, -d.getDay()); // week starts Sunday
 const todayIso = () => iso(new Date());
 
-type View = "dia" | "semana" | "mes";
+type CalView = "dia" | "semana" | "mes";
 
 export function CalendarView({ events, t }: { events: CalEvent[]; t: T }) {
-  const [view, setView] = useState<View>("mes");
+  const [view, setView] = useState<CalView>("mes");
   const [cursor, setCursor] = useState<Date>(new Date());
 
   const eventsByDate = useMemo(() => {
@@ -67,7 +67,7 @@ export function CalendarView({ events, t }: { events: CalEvent[]; t: T }) {
     <View style={styles.root}>
       {/* View switcher */}
       <View style={styles.switcher}>
-        {(["dia", "semana", "mes"] as View[]).map((v) => (
+        {(["dia", "semana", "mes"] as CalView[]).map((v) => (
           <Pressable
             key={v}
             style={[styles.switchBtn, view === v && styles.switchBtnActive]}

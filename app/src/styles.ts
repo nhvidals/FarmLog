@@ -672,4 +672,213 @@ export const styles = StyleSheet.create({
     borderRadius: 2,
     backgroundColor: C.tabActive,
   },
+
+  // ── Search / filter / sort ──
+  searchWrap: {
+    marginBottom: 12,
+    gap: 8,
+  },
+  searchRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    backgroundColor: C.surface,
+    borderWidth: 1,
+    borderColor: C.border,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+  },
+  searchIcon: {
+    fontSize: 14,
+  },
+  searchInput: {
+    flex: 1,
+    paddingVertical: 8,
+    fontSize: 14,
+    color: C.text,
+  },
+  searchClear: {
+    fontSize: 14,
+    color: C.textMuted,
+    fontWeight: "700",
+    paddingHorizontal: 4,
+  },
+  filterToggle: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    backgroundColor: C.bg,
+    borderWidth: 1,
+    borderColor: C.border,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  filterToggleActive: {
+    backgroundColor: C.primary,
+    borderColor: C.primary,
+  },
+  filterToggleText: {
+    fontSize: 15,
+    color: C.textSub,
+  },
+  filterToggleTextActive: {
+    color: "#fff",
+  },
+  filterPanel: {
+    backgroundColor: C.surface,
+    borderWidth: 1,
+    borderColor: C.border,
+    borderRadius: 12,
+    padding: 12,
+    gap: 2,
+  },
+  chipWrapRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 6,
+    marginBottom: 4,
+  },
+  resultsCount: {
+    fontSize: 12,
+    color: C.textMuted,
+    fontWeight: "600",
+    paddingHorizontal: 4,
+  },
+
+  // ── Loading / error box ──
+  loadingBox: {
+    alignItems: "center",
+    paddingVertical: 40,
+    gap: 12,
+  },
+  loadingText: {
+    fontSize: 14,
+    color: C.textMuted,
+    textAlign: "center",
+  },
+  emptyStateIcon: {
+    fontSize: 40,
+    opacity: 0.5,
+  },
+
+  // Inactive (sold / deceased) animal card
+  cardInactive: {
+    opacity: 0.6,
+  },
+
+  // ── Dashboard ──
+  dashHeader: {
+    marginBottom: 16,
+  },
+  dashHello: {
+    fontSize: 20,
+    fontWeight: "800",
+    color: C.text,
+  },
+  dashFarm: {
+    fontSize: 14,
+    color: C.textSub,
+    marginTop: 2,
+  },
+  statGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+    marginBottom: 16,
+  },
+  statCard: {
+    flexGrow: 1,
+    flexBasis: "45%",
+    backgroundColor: C.surface,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: C.border,
+    paddingVertical: 16,
+    paddingHorizontal: 14,
+    alignItems: "center",
+    gap: 4,
+    boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
+    elevation: 1,
+  },
+  statValue: {
+    fontSize: 28,
+    fontWeight: "800",
+    color: C.primary,
+  },
+  statLabel: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: C.textSub,
+    textTransform: "uppercase",
+    letterSpacing: 0.4,
+  },
+
+  // ── Members modal ──
+  membersHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 4,
+  },
+  membersClose: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: C.textMuted,
+  },
+  memberRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    backgroundColor: C.bg,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: C.border,
+    padding: 10,
+  },
+  memberEmail: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: C.text,
+  },
+  memberActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  memberRemoveBtn: {
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+    borderRadius: 8,
+    backgroundColor: C.dangerBg,
+    borderWidth: 1,
+    borderColor: C.danger,
+  },
+  memberRemoveText: {
+    fontSize: 14,
+  },
+  memberAddForm: {
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: C.divider,
+    gap: 4,
+  },
+
+  // Read-only (vet) banner
+  roleBanner: {
+    backgroundColor: C.warningBg,
+    borderColor: C.warning,
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    marginBottom: 12,
+  },
+  roleBannerText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: C.warning,
+    textAlign: "center",
+  },
 });

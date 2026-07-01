@@ -4,10 +4,26 @@ export type Sex = (typeof SEXES)[number];
 export const ANIMAL_CATEGORIES = ["oviparous", "viviparous"] as const;
 export type AnimalCategory = (typeof ANIMAL_CATEGORIES)[number];
 
+export const ANIMAL_STATUSES = ["active", "sold", "deceased"] as const;
+export type AnimalStatus = (typeof ANIMAL_STATUSES)[number];
+
+export const FARM_ROLES = ["owner", "worker", "vet"] as const;
+export type FarmRole = (typeof FARM_ROLES)[number];
+
+export const ASSIGNABLE_FARM_ROLES = ["worker", "vet"] as const;
+export type AssignableFarmRole = (typeof ASSIGNABLE_FARM_ROLES)[number];
+
 export interface Farm {
   _id: string;
   name: string;
   location?: string;
+  role?: FarmRole;
+}
+
+export interface FarmMember {
+  userId: string;
+  email: string;
+  role: FarmRole;
 }
 
 export interface AnimalType {
@@ -29,6 +45,9 @@ export interface Animal {
   fatherId?: string;
   motherId?: string;
   notes?: string;
+  status?: AnimalStatus;
+  statusDate?: string;
+  statusReason?: string;
 }
 
 export interface IncubationBatch {
