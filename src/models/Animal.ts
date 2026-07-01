@@ -1,5 +1,5 @@
 import { Schema, model, Types } from "mongoose";
-import type { Sex } from "../types/domain";
+import { ANIMAL_STATUSES, type AnimalStatus, type Sex } from "../types/domain";
 
 export interface Animal {
   _id: Types.ObjectId;
@@ -13,6 +13,9 @@ export interface Animal {
   fatherId?: Types.ObjectId;
   motherId?: Types.ObjectId;
   notes?: string;
+  status: AnimalStatus;
+  statusDate?: Date;
+  statusReason?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -28,7 +31,10 @@ const animalSchema = new Schema<Animal>(
     ringNumber: { type: String, required: true, trim: true },
     fatherId: { type: Schema.Types.ObjectId, ref: "Animal" },
     motherId: { type: Schema.Types.ObjectId, ref: "Animal" },
-    notes: { type: String }
+    notes: { type: String },
+    status: { type: String, enum: ANIMAL_STATUSES, default: "active", index: true },
+    statusDate: { type: Date },
+    statusReason: { type: String, trim: true }
   },
   { timestamps: true }
 );

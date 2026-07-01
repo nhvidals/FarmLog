@@ -3,3 +3,18 @@ export type Sex = (typeof SEXES)[number];
 
 export const ANIMAL_CATEGORIES = ["oviparous", "viviparous"] as const;
 export type AnimalCategory = (typeof ANIMAL_CATEGORIES)[number];
+
+export const ANIMAL_STATUSES = ["active", "sold", "deceased"] as const;
+export type AnimalStatus = (typeof ANIMAL_STATUSES)[number];
+
+/**
+ * Farm access roles. `owner` is implicit (the farm's creator) and has full
+ * control including member management and deletion; `worker` can read and write
+ * farm data; `vet` is read-only. Only `worker` and `vet` are assignable to
+ * members — ownership is not transferable through the membership API.
+ */
+export const FARM_ROLES = ["owner", "worker", "vet"] as const;
+export type FarmRole = (typeof FARM_ROLES)[number];
+
+export const ASSIGNABLE_FARM_ROLES = ["worker", "vet"] as const;
+export type AssignableFarmRole = (typeof ASSIGNABLE_FARM_ROLES)[number];
