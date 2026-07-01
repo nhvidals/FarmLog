@@ -3,6 +3,11 @@
 Farm and livestock management app with support for:
 
 - Animal records with photo, birth date, sex, designation, category (oviparous/viviparous), and ring number
+- Animal lifecycle status (active / sold / deceased) with status date and reason
+- Home dashboard: headline counts and a 7-day upcoming-events feed
+- Animal list search, status/sex filters, and sorting (newest / name / ring)
+- In-app calendar date pickers for all date fields (no manual typing)
+- Pull-to-refresh with loading, empty, and error/retry states
 - Animal genealogy tree (father/mother)
 - Egg incubation management with scheduled notifications
 - Medication scheduling with scheduled notifications
@@ -68,6 +73,8 @@ The API starts on `http://localhost:4000` by default.
 | POST | `/auth/register` | public | Create an account, returns a JWT |
 | POST | `/auth/login` | public | Log in, returns a JWT |
 | GET / POST / DELETE | `/farms` | required | List / create / delete the caller's farms |
+| GET / POST | `/farms/:id/members` | required | List farm members / add a member by email (owner only) |
+| PUT / DELETE | `/farms/:id/members/:userId` | required | Change a member's role / remove a member (owner only) |
 | GET / POST / PUT / DELETE | `/animals` | required | Animal CRUD |
 | GET | `/animals/:id/tree` | required | Genealogy tree |
 | GET / POST / PUT / DELETE | `/incubation` | required | Incubation batch CRUD |
@@ -88,15 +95,32 @@ with `JWT_SECRET` (required env var) and expire after `JWT_TTL` (default 30 days
 
 ### Multi-farm
 
-Each farm is owned by the user who created it; users only ever see and modify
-their own farms. Data endpoints additionally take a `farmId`, supplied as:
+Data endpoints take a `farmId`, supplied as:
 
 - Header: `x-farm-id: <id>`
 - Query param: `?farmId=<id>`
 
-The server verifies the authenticated user owns that farm and returns `404` for
-farms that don't exist **or** belong to another user. The mobile app sends both
-the token and the active farm id automatically.
+The server verifies the caller has access to that farm and returns `404` for
+farms that don't exist **or** that the caller isn't a member of (the difference
+is not disclosed). The mobile app sends both the token and the active farm id
+automatically.
+
+### Members & roles
+
+A farm has one **owner** (its creator) and any number of invited members. Each
+member has a role that gates what they can do:
+
+| Role | Read data | Write data (create/edit/delete) | Manage members / delete farm |
+|---|:---:|:---:|:---:|
+| `owner` | ✅ | ✅ | ✅ |
+| `worker` | ✅ | ✅ | — |
+| `vet` | ✅ | — (writes return `403`) | — |
+
+The owner adds members by email via `POST /farms/:id/members` (the user must
+already have an account). `GET /farms` returns each farm annotated with the
+caller's `role`, which the app uses to hide actions the role can't perform.
+Ownership is not transferable through the members API — only `worker` and `vet`
+are assignable.
 
 ---
 
