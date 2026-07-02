@@ -353,31 +353,6 @@ function AppInner() {
         {/* ── Members management (owner only) ── */}
         <MembersModal visible={showMembers} onClose={() => setShowMembers(false)} />
 
-        {/* ── Confirmation dialog ── */}
-        <Modal visible={!!confirm} transparent animationType="fade" onRequestClose={() => setConfirm(null)}>
-          <Pressable style={styles.modalOverlay} onPress={() => setConfirm(null)}>
-            <Pressable style={styles.modalCard} onPress={() => {}}>
-              <Text style={styles.modalTitle}>{confirm?.title}</Text>
-              <Text style={styles.modalMessage}>{confirm?.message}</Text>
-              <View style={styles.modalActions}>
-                <Pressable style={[styles.modalBtn, styles.modalBtnCancel]} onPress={() => setConfirm(null)}>
-                  <Text style={styles.modalBtnCancelText}>{t.cancel}</Text>
-                </Pressable>
-                <Pressable
-                  style={[styles.modalBtn, styles.modalBtnDanger]}
-                  onPress={async () => {
-                    const action = confirm?.onConfirm;
-                    setConfirm(null);
-                    if (action) await action();
-                  }}
-                >
-                  <Text style={styles.modalBtnDangerText}>{confirm?.confirmLabel}</Text>
-                </Pressable>
-              </View>
-            </Pressable>
-          </Pressable>
-        </Modal>
-
         {/* ── Header ── */}
         <View style={styles.header}>
           <View style={styles.headerTop}>
@@ -540,6 +515,34 @@ function AppInner() {
             );
           })}
         </View>
+
+        {/* ── Confirmation dialog ──
+            Rendered last so it stacks above screen-level modals (e.g. the
+            animal-history modal). On web, RN modals share a stacking context
+            and later DOM order wins; on native, later mount presents on top. */}
+        <Modal visible={!!confirm} transparent animationType="fade" onRequestClose={() => setConfirm(null)}>
+          <Pressable style={styles.modalOverlay} onPress={() => setConfirm(null)}>
+            <Pressable style={styles.modalCard} onPress={() => {}}>
+              <Text style={styles.modalTitle}>{confirm?.title}</Text>
+              <Text style={styles.modalMessage}>{confirm?.message}</Text>
+              <View style={styles.modalActions}>
+                <Pressable style={[styles.modalBtn, styles.modalBtnCancel]} onPress={() => setConfirm(null)}>
+                  <Text style={styles.modalBtnCancelText}>{t.cancel}</Text>
+                </Pressable>
+                <Pressable
+                  style={[styles.modalBtn, styles.modalBtnDanger]}
+                  onPress={async () => {
+                    const action = confirm?.onConfirm;
+                    setConfirm(null);
+                    if (action) await action();
+                  }}
+                >
+                  <Text style={styles.modalBtnDangerText}>{confirm?.confirmLabel}</Text>
+                </Pressable>
+              </View>
+            </Pressable>
+          </Pressable>
+        </Modal>
       </SafeAreaView>
     </AppProvider>
   );
