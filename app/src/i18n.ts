@@ -240,6 +240,12 @@ export const translations = {
     dashStepType: "Criar um tipo de animal",
     dashStepAnimal: "Adicionar o primeiro animal",
 
+    // Medication recurrence
+    freqLabel: "Frequencia",
+    repeatEvery: "Repetir a cada",
+    endDateLabel: "Termina em (opcional)",
+    recurringEvery: "A cada {n} {unit}",
+
     // Members / roles
     manageMembers: "Gerir membros",
     membersTitle: "Membros da quinta",
@@ -276,6 +282,17 @@ export const translations = {
       owner: "Proprietario",
       worker: "Trabalhador",
       vet: "Veterinario",
+    },
+    freqLabels: {
+      once: "Uma vez",
+      daily: "Diaria",
+      weekly: "Semanal",
+      monthly: "Mensal",
+    },
+    unitLabels: {
+      daily: "dias",
+      weekly: "semanas",
+      monthly: "meses",
     },
   },
   en: {
@@ -517,6 +534,12 @@ export const translations = {
     dashStepType: "Create an animal type",
     dashStepAnimal: "Add your first animal",
 
+    // Medication recurrence
+    freqLabel: "Frequency",
+    repeatEvery: "Repeat every",
+    endDateLabel: "Ends on (optional)",
+    recurringEvery: "Every {n} {unit}",
+
     // Members / roles
     manageMembers: "Manage members",
     membersTitle: "Farm members",
@@ -553,6 +576,17 @@ export const translations = {
       owner: "Owner",
       worker: "Worker",
       vet: "Vet",
+    },
+    freqLabels: {
+      once: "Once",
+      daily: "Daily",
+      weekly: "Weekly",
+      monthly: "Monthly",
+    },
+    unitLabels: {
+      daily: "days",
+      weekly: "weeks",
+      monthly: "months",
     },
   },
 } as const;

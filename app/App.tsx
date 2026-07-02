@@ -35,6 +35,7 @@ import { IncubationScreen } from "./src/screens/Incubation";
 import { MedicationScreen } from "./src/screens/Medication";
 import { MembersModal } from "./src/screens/Members";
 import { OnboardingScreen } from "./src/screens/Onboarding";
+import { ReminderScheduler } from "./src/screens/ReminderScheduler";
 import { clearSession, loadSession, saveSession } from "./src/storage";
 import { styles } from "./src/styles";
 import { C } from "./src/theme";
@@ -345,6 +346,9 @@ function AppInner() {
     <AppProvider value={ctx}>
       <SafeAreaView style={styles.safeArea}>
         <StatusBar style="light" />
+
+        {/* Re-arms local reminders from stored schedules (renders nothing). */}
+        <ReminderScheduler />
 
         {/* ── Members management (owner only) ── */}
         <MembersModal visible={showMembers} onClose={() => setShowMembers(false)} />

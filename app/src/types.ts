@@ -13,6 +13,9 @@ export type FarmRole = (typeof FARM_ROLES)[number];
 export const ASSIGNABLE_FARM_ROLES = ["worker", "vet"] as const;
 export type AssignableFarmRole = (typeof ASSIGNABLE_FARM_ROLES)[number];
 
+export const MEDICATION_FREQUENCIES = ["once", "daily", "weekly", "monthly"] as const;
+export type MedicationFrequency = (typeof MEDICATION_FREQUENCIES)[number];
+
 export interface Farm {
   _id: string;
   name: string;
@@ -70,5 +73,8 @@ export interface MedicationSchedule {
   medicineName: string;
   dose: string;
   date: string;
+  frequency?: MedicationFrequency;
+  interval?: number;
+  endDate?: string;
   notes?: string;
 }

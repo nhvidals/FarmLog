@@ -4,10 +4,11 @@ import { Badge, EmptyState, FieldLabel, SectionHeader } from "../components";
 import { useApp } from "../context";
 import { DatePickerField } from "../datepicker";
 import { fmt } from "../i18n";
-import { isDate, scheduleLocalNotification, toIsoDateOnly } from "../helpers";
+import { isDate, toIsoDateOnly } from "../helpers";
 import { useAnimals, useInvalidateFarmData, useMedication } from "../queries";
 import { styles } from "../styles";
 import { C } from "../theme";
+import { MEDICATION_FREQUENCIES, MedicationFrequency, MedicationSchedule } from "../types";
 
 export function MedicationScreen() {
   const { t, api, farmId, token, showToast, canWrite } = useApp();
@@ -21,28 +22,46 @@ export function MedicationScreen() {
   const [name, setName] = useState("");
   const [dose, setDose] = useState("");
   const [date, setDate] = useState("2026-06-24");
+  const [frequency, setFrequency] = useState<MedicationFrequency>("once");
+  const [interval, setInterval] = useState("1");
+  const [endDate, setEndDate] = useState("");
 
   const create = async () => {
     if (!farmId) { showToast("warning", t.valSelectFarm); return; }
     if (!animalId || !name.trim() || !dose.trim()) { showToast("warning", t.valMedicationFields); return; }
     if (!isDate(date)) { showToast("warning", t.valDate); return; }
+    const recurring = frequency !== "once";
     try {
+      // Notifications are (re)scheduled centrally by ReminderScheduler from the
+      // stored schedules, so this only persists the record.
       await api.post("/medication", {
         animalId,
         medicineName: name.trim(),
         dose: dose.trim(),
         date,
+        frequency,
+        interval: recurring ? Math.max(1, Number(interval) || 1) : 1,
+        endDate: recurring && endDate ? endDate : undefined,
       });
-      const notifBody = fmt(t.notifMedicationBody, { name, dose });
-      await scheduleLocalNotification(t.notifMedicationTitle, notifBody, new Date(date + "T09:00:00"));
       setName("");
       setDose("");
+      setFrequency("once");
+      setInterval("1");
+      setEndDate("");
       setShowForm(false);
       invalidate();
       showToast("success", t.successMedicationCreated);
     } catch {
       showToast("error", t.errCreateMedication);
     }
+  };
+
+  // Human-readable recurrence label for a schedule, or null when one-off.
+  const recurrenceLabel = (m: MedicationSchedule): string | null => {
+    const f = m.frequency ?? "once";
+    if (f === "once") return null;
+    const n = m.interval ?? 1;
+    return n === 1 ? t.freqLabels[f] : fmt(t.recurringEvery, { n: String(n), unit: t.unitLabels[f] });
   };
 
   return (
@@ -84,6 +103,41 @@ export function MedicationScreen() {
           <FieldLabel text={t.datePlaceholder} />
           <DatePickerField value={date} onChange={setDate} t={t} />
 
+          <FieldLabel text={t.freqLabel} />
+          <View style={styles.segmentRow}>
+            {MEDICATION_FREQUENCIES.map((f) => (
+              <Pressable
+                key={f}
+                style={[styles.segment, frequency === f && styles.segmentActive]}
+                onPress={() => setFrequency(f)}
+              >
+                <Text style={[styles.segmentText, frequency === f && styles.segmentTextActive]}>
+                  {t.freqLabels[f]}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+
+          {frequency !== "once" && (
+            <>
+              <FieldLabel text={t.repeatEvery} />
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+                <TextInput
+                  style={[styles.input, { width: 80, marginBottom: 0 }]}
+                  value={interval}
+                  onChangeText={setInterval}
+                  keyboardType="numeric"
+                  placeholder="1"
+                  placeholderTextColor={C.textMuted}
+                />
+                <Text style={styles.cardSub}>{t.unitLabels[frequency]}</Text>
+              </View>
+
+              <FieldLabel text={t.endDateLabel} />
+              <DatePickerField value={endDate} onChange={setEndDate} t={t} optional minValue={date} />
+            </>
+          )}
+
           <Pressable style={styles.primaryBtn} onPress={create}>
             <Text style={styles.primaryBtnText}>{t.saveMedication}</Text>
           </Pressable>
@@ -106,6 +160,9 @@ export function MedicationScreen() {
             </View>
             <View style={styles.cardMeta}>
               <Text style={styles.cardMetaText}>📅 {toIsoDateOnly(entry.date)}</Text>
+              {recurrenceLabel(entry) && (
+                <Text style={styles.cardMetaText}>🔁 {recurrenceLabel(entry)}</Text>
+              )}
             </View>
           </View>
         ))

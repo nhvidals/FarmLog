@@ -18,3 +18,11 @@ export type FarmRole = (typeof FARM_ROLES)[number];
 
 export const ASSIGNABLE_FARM_ROLES = ["worker", "vet"] as const;
 export type AssignableFarmRole = (typeof ASSIGNABLE_FARM_ROLES)[number];
+
+/**
+ * How often a medication/treatment repeats. "once" is a single dose (the
+ * default and the historical behaviour); the others repeat every `interval`
+ * units from the start `date` until the optional `endDate`.
+ */
+export const MEDICATION_FREQUENCIES = ["once", "daily", "weekly", "monthly"] as const;
+export type MedicationFrequency = (typeof MEDICATION_FREQUENCIES)[number];

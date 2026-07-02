@@ -3,6 +3,7 @@ import { AnimalModel } from "../models/Animal";
 import { MedicationScheduleModel } from "../models/MedicationSchedule";
 import { getFarmIdFromRequest } from "../utils/farmContext";
 import { serverError, stripImmutableFields } from "../utils/http";
+import { validateRecurrenceRange } from "../utils/validation";
 
 export const medicationRouter = Router();
 
@@ -29,6 +30,9 @@ medicationRouter.post("/", async (req, res) => {
     const animal = await AnimalModel.findOne({ _id: req.body?.animalId, farmId }).lean();
     if (!animal) return res.status(400).json({ message: "Animal does not exist in this farm" });
 
+    const recurrenceError = validateRecurrenceRange(req.body?.date, req.body?.endDate);
+    if (recurrenceError) return res.status(400).json({ message: recurrenceError.message });
+
     const created = await MedicationScheduleModel.create({ ...req.body, farmId });
     return res.status(201).json(created);
   } catch (error) {
@@ -46,6 +50,18 @@ medicationRouter.put("/:id", async (req, res) => {
     if (safeBody.animalId) {
       const animal = await AnimalModel.findOne({ _id: safeBody.animalId, farmId }).lean();
       if (!animal) return res.status(400).json({ message: "Animal does not exist in this farm" });
+    }
+
+    // Validate the recurrence range against the effective start date (the one
+    // in the update, or the stored one when only endDate is being changed).
+    if (safeBody.endDate !== undefined) {
+      let startDate = safeBody.date;
+      if (startDate === undefined) {
+        const existing = await MedicationScheduleModel.findOne({ _id: req.params.id, farmId }).select("date").lean();
+        startDate = existing?.date;
+      }
+      const recurrenceError = validateRecurrenceRange(startDate, safeBody.endDate);
+      if (recurrenceError) return res.status(400).json({ message: recurrenceError.message });
     }
 
     const updated = await MedicationScheduleModel.findOneAndUpdate(

@@ -1,7 +1,29 @@
-import { Platform } from "react-native";
-import * as Notifications from "expo-notifications";
 import { Animal, AnimalCategory, AnimalType, AnimalStatus, IncubationBatch, MedicationSchedule } from "./types";
 import { CalEvent } from "./calendar";
+
+// ── Local-time date helpers ──
+const pad = (n: number) => String(n).padStart(2, "0");
+const isoOf = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const addDays = (d: Date, n: number) => {
+  const x = new Date(d);
+  x.setDate(x.getDate() + n);
+  return x;
+};
+const addMonths = (d: Date, n: number) => {
+  const x = new Date(d);
+  const day = x.getDate();
+  x.setDate(1);
+  x.setMonth(x.getMonth() + n);
+  const daysInMonth = new Date(x.getFullYear(), x.getMonth() + 1, 0).getDate();
+  x.setDate(Math.min(day, daysInMonth));
+  return x;
+};
+/** Parses any date-ish value to a local-midnight Date, or null. */
+const parseLocalDate = (value: unknown): Date | null => {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(toIsoDateOnly(value));
+  if (!m) return null;
+  return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+};
 
 /** Normalizes any date-ish value to a YYYY-MM-DD string (empty when absent). */
 export const toIsoDateOnly = (value: unknown): string => {
@@ -26,20 +48,41 @@ export const ringOf = (animals: Animal[], animalId?: string): string =>
   animals.find((a) => a._id === animalId)?.ringNumber ?? "";
 
 /**
- * Best-effort local notification. Date-triggered notifications are not supported
- * on web, and scheduling can fail for permission reasons, so this must never
- * throw — it should not block the action that triggered it.
+ * Expands a (possibly recurring) medication schedule into individual occurrence
+ * dates (YYYY-MM-DD) within an optional window. One-off schedules yield a single
+ * date. Recurring ones step by `interval` units of `frequency` from `date` until
+ * `endDate`, the window's `to` bound, or the `cap` — whichever comes first.
  */
-export const scheduleLocalNotification = async (title: string, body: string, date: Date): Promise<void> => {
-  if (Platform.OS === "web") return;
-  try {
-    await Notifications.scheduleNotificationAsync({
-      content: { title, body },
-      trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date },
-    });
-  } catch {
-    // ignore — notifications are a non-critical enhancement
+export const expandOccurrences = (
+  schedule: Pick<MedicationSchedule, "date" | "frequency" | "interval" | "endDate">,
+  opts: { from?: Date; to: Date; cap?: number }
+): string[] => {
+  const start = parseLocalDate(schedule.date);
+  if (!start) return [];
+  const freq = schedule.frequency ?? "once";
+  const interval = Math.max(1, schedule.interval ?? 1);
+  const cap = opts.cap ?? 120;
+  const endDate = schedule.endDate ? parseLocalDate(schedule.endDate) : null;
+  const upper = endDate && endDate < opts.to ? endDate : opts.to;
+
+  const within = (d: Date) => !opts.from || d >= opts.from;
+  const out: string[] = [];
+
+  if (freq === "once") {
+    if (within(start) && start <= opts.to) out.push(isoOf(start));
+    return out;
   }
+
+  let cur = start;
+  let guard = 0;
+  while (cur <= upper && out.length < cap && guard < 4000) {
+    guard++;
+    if (within(cur)) out.push(isoOf(cur));
+    cur = freq === "daily" ? addDays(cur, interval)
+      : freq === "weekly" ? addDays(cur, interval * 7)
+      : addMonths(cur, interval);
+  }
+  return out;
 };
 
 /** Aggregates all farm milestones (births, incubation, medication) for the calendar. */
@@ -59,10 +102,17 @@ export const buildCalendarEvents = (
     const h = toIsoDateOnly(b.expectedHatchDate);
     if (h) evts.push({ date: h, kind: "hatch", title: b.incubatorName, subtitle: b.species });
   }
+  // Recurring medications are expanded to individual doses across a window that
+  // covers recent past + a year ahead so the calendar shows every occurrence.
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const from = addDays(today, -45);
+  const to = addDays(today, 365);
   for (const m of medicationList) {
-    const d = toIsoDateOnly(m.date);
     const who = typeof m.animalId === "string" ? m.animalId : m.animalId?.name ?? "";
-    if (d) evts.push({ date: d, kind: "medication", title: m.medicineName, subtitle: who });
+    for (const d of expandOccurrences(m, { from, to })) {
+      evts.push({ date: d, kind: "medication", title: m.medicineName, subtitle: who });
+    }
   }
   return evts;
 };

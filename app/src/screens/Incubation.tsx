@@ -3,8 +3,7 @@ import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { Badge, EmptyState, FieldLabel, SectionHeader } from "../components";
 import { useApp } from "../context";
 import { DatePickerField } from "../datepicker";
-import { fmt } from "../i18n";
-import { isDate, scheduleLocalNotification, toIsoDateOnly } from "../helpers";
+import { isDate, toIsoDateOnly } from "../helpers";
 import { useAnimalTypes, useIncubation, useInvalidateFarmData } from "../queries";
 import { styles } from "../styles";
 import { C } from "../theme";
@@ -35,6 +34,7 @@ export function IncubationScreen() {
       return;
     }
     try {
+      // Notifications are (re)scheduled centrally by ReminderScheduler.
       await api.post("/incubation", {
         species,
         eggCount: Number(eggCount),
@@ -42,8 +42,6 @@ export function IncubationScreen() {
         startDate,
         expectedHatchDate: expectedDate,
       });
-      const notifBody = fmt(t.notifIncubationBody, { name: incubatorName });
-      await scheduleLocalNotification(t.notifIncubationTitle, notifBody, new Date(expectedDate + "T09:00:00"));
       setShowForm(false);
       invalidate();
       showToast("success", t.successIncubationCreated);

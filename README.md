@@ -177,6 +177,7 @@ Use [app/REGRESSION_TEST_PLAN.md](app/REGRESSION_TEST_PLAN.md) for the manual re
 
 ## Notes
 
-- Notifications are local and scheduled at record-creation time (incubation hatch date, medication date).
+- **Medications can recur.** A schedule has a `frequency` (`once` / `daily` / `weekly` / `monthly`), an `interval` (every N units), and an optional `endDate`. `once` is the default and matches the original one-off behaviour. The API validates that `endDate` is not before `date`.
+- **Reminders are local and re-derived from data.** The app re-schedules upcoming reminders (recurring medication doses + incubation hatch dates) for the active farm on every launch and whenever that data changes, so they survive an app relaunch/reinstall. They are best-effort local notifications (no server push), a no-op on web, and cover the active farm only.
 - Import/export uses JSON files matching the structure returned by `GET /data/export`. Strip `_id` fields when importing into a different farm to avoid duplicate key conflicts.
 - Animal photos use the device's local URI (MVP). For production use remote storage (S3, Cloudinary, etc.).
