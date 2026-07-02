@@ -178,6 +178,62 @@ describe("PUT /medication/:id", () => {
   });
 });
 
+// ── Recurrence ─────────────────────────────────────────────────────────────────
+
+describe("Medication recurrence", () => {
+  it("defaults to a one-off (frequency 'once', interval 1)", async () => {
+    const farmId = await createFarm();
+    const animal = await createAnimal(farmId);
+    const res = await createMedication(farmId, animal._id);
+    expect(res.status).toBe(201);
+    expect(res.body.frequency).toBe("once");
+    expect(res.body.interval).toBe(1);
+  });
+
+  it("persists a recurring schedule (weekly, every 2, with an end date)", async () => {
+    const farmId = await createFarm();
+    const animal = await createAnimal(farmId);
+    const res = await createMedication(farmId, animal._id, {
+      frequency: "weekly",
+      interval: 2,
+      endDate: "2026-09-01",
+    });
+    expect(res.status).toBe(201);
+    expect(res.body.frequency).toBe("weekly");
+    expect(res.body.interval).toBe(2);
+    expect(new Date(res.body.endDate).toISOString().slice(0, 10)).toBe("2026-09-01");
+  });
+
+  it("rejects an endDate before the start date", async () => {
+    const farmId = await createFarm();
+    const animal = await createAnimal(farmId);
+    const res = await createMedication(farmId, animal._id, {
+      date: "2026-06-01",
+      frequency: "monthly",
+      endDate: "2026-05-01",
+    });
+    expect(res.status).toBe(400);
+  });
+
+  it("rejects an interval below 1", async () => {
+    const farmId = await createFarm();
+    const animal = await createAnimal(farmId);
+    const res = await createMedication(farmId, animal._id, { frequency: "daily", interval: 0 });
+    expect(res.status).toBe(400);
+  });
+
+  it("rejects a PUT that moves endDate before the stored start date", async () => {
+    const farmId = await createFarm();
+    const animal = await createAnimal(farmId);
+    const created = await createMedication(farmId, animal._id, { date: "2026-06-01", frequency: "weekly" });
+    const res = await request(app)
+      .put(`/medication/${created.body._id}`)
+      .set("x-farm-id", farmId)
+      .send({ endDate: "2026-05-01" });
+    expect(res.status).toBe(400);
+  });
+});
+
 // ── DELETE /medication/:id ────────────────────────────────────────────────────
 
 describe("DELETE /medication/:id", () => {

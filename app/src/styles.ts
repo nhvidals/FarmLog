@@ -672,4 +672,507 @@ export const styles = StyleSheet.create({
     borderRadius: 2,
     backgroundColor: C.tabActive,
   },
+
+  // ── Search / filter / sort ──
+  searchWrap: {
+    marginBottom: 12,
+    gap: 8,
+  },
+  searchRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    backgroundColor: C.surface,
+    borderWidth: 1,
+    borderColor: C.border,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+  },
+  searchIcon: {
+    fontSize: 14,
+  },
+  searchInput: {
+    flex: 1,
+    paddingVertical: 8,
+    fontSize: 14,
+    color: C.text,
+  },
+  searchClear: {
+    fontSize: 14,
+    color: C.textMuted,
+    fontWeight: "700",
+    paddingHorizontal: 4,
+  },
+  filterToggle: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    backgroundColor: C.bg,
+    borderWidth: 1,
+    borderColor: C.border,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  filterToggleActive: {
+    backgroundColor: C.primary,
+    borderColor: C.primary,
+  },
+  filterToggleText: {
+    fontSize: 15,
+    color: C.textSub,
+  },
+  filterToggleTextActive: {
+    color: "#fff",
+  },
+  filterPanel: {
+    backgroundColor: C.surface,
+    borderWidth: 1,
+    borderColor: C.border,
+    borderRadius: 12,
+    padding: 12,
+    gap: 2,
+  },
+  chipWrapRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 6,
+    marginBottom: 4,
+  },
+  resultsCount: {
+    fontSize: 12,
+    color: C.textMuted,
+    fontWeight: "600",
+    paddingHorizontal: 4,
+  },
+
+  // ── Loading / error box ──
+  loadingBox: {
+    alignItems: "center",
+    paddingVertical: 40,
+    gap: 12,
+  },
+  loadingText: {
+    fontSize: 14,
+    color: C.textMuted,
+    textAlign: "center",
+  },
+  emptyStateIcon: {
+    fontSize: 40,
+    opacity: 0.5,
+  },
+
+  // Inactive (sold / deceased) animal card
+  cardInactive: {
+    opacity: 0.6,
+  },
+
+  // ── Dashboard ──
+  dashHeader: {
+    marginBottom: 16,
+  },
+  dashHello: {
+    fontSize: 20,
+    fontWeight: "800",
+    color: C.text,
+  },
+  dashFarm: {
+    fontSize: 14,
+    color: C.textSub,
+    marginTop: 2,
+  },
+  statGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+    marginBottom: 16,
+  },
+  statCard: {
+    flexGrow: 1,
+    flexBasis: "45%",
+    backgroundColor: C.surface,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: C.border,
+    paddingVertical: 16,
+    paddingHorizontal: 14,
+    alignItems: "center",
+    gap: 4,
+    boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
+    elevation: 1,
+  },
+  statValue: {
+    fontSize: 28,
+    fontWeight: "800",
+    color: C.primary,
+  },
+  statLabel: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: C.textSub,
+    textTransform: "uppercase",
+    letterSpacing: 0.4,
+  },
+
+  // ── Members modal ──
+  membersHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 4,
+  },
+  membersClose: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: C.textMuted,
+  },
+  memberRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    backgroundColor: C.bg,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: C.border,
+    padding: 10,
+  },
+  memberEmail: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: C.text,
+  },
+  memberActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  memberRemoveBtn: {
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+    borderRadius: 8,
+    backgroundColor: C.dangerBg,
+    borderWidth: 1,
+    borderColor: C.danger,
+  },
+  memberRemoveText: {
+    fontSize: 14,
+  },
+  memberAddForm: {
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: C.divider,
+    gap: 4,
+  },
+
+  // ── Animal history timeline ──
+  weightSummary: {
+    flexDirection: "row",
+    alignItems: "baseline",
+    gap: 8,
+    backgroundColor: C.primaryLight,
+    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    marginTop: 4,
+  },
+  weightSummaryLabel: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: C.textSub,
+    textTransform: "uppercase",
+    letterSpacing: 0.4,
+  },
+  weightSummaryValue: {
+    fontSize: 20,
+    fontWeight: "800",
+    color: C.primary,
+  },
+  weightSummaryDate: {
+    fontSize: 12,
+    color: C.textMuted,
+    marginLeft: "auto",
+  },
+  eventForm: {
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: C.divider,
+    gap: 2,
+  },
+  eventRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    backgroundColor: C.bg,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: C.border,
+    padding: 10,
+  },
+  eventRowIcon: {
+    fontSize: 20,
+  },
+  eventRowType: {
+    fontSize: 13,
+    fontWeight: "800",
+    color: C.text,
+  },
+  eventRowDesc: {
+    fontSize: 13,
+    color: C.textSub,
+    marginTop: 1,
+  },
+  eventRowDate: {
+    fontSize: 11,
+    color: C.textMuted,
+    fontWeight: "600",
+  },
+  eventRemoveBtn: {
+    paddingHorizontal: 6,
+    paddingVertical: 4,
+  },
+  eventRemoveText: {
+    fontSize: 14,
+  },
+
+  // ── Onboarding (first run) ──
+  onbRoot: {
+    flex: 1,
+    backgroundColor: C.bg,
+  },
+  onbTopBar: {
+    backgroundColor: C.primaryDark,
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 12,
+    flexDirection: "row",
+    justifyContent: "flex-end",
+  },
+  onbScroll: {
+    padding: 20,
+    paddingBottom: 40,
+    gap: 4,
+  },
+  onbEmoji: {
+    fontSize: 48,
+    textAlign: "center",
+    marginTop: 8,
+  },
+  onbTitle: {
+    fontSize: 24,
+    fontWeight: "800",
+    color: C.text,
+    textAlign: "center",
+    marginTop: 8,
+  },
+  onbSubtitle: {
+    fontSize: 15,
+    color: C.textSub,
+    textAlign: "center",
+    marginTop: 4,
+    marginBottom: 16,
+  },
+  onbFeatures: {
+    gap: 10,
+    marginBottom: 16,
+    paddingHorizontal: 4,
+  },
+  onbFeatureRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  onbFeatureIcon: {
+    fontSize: 22,
+    width: 30,
+    textAlign: "center",
+  },
+  onbFeatureText: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: "600",
+    color: C.textSub,
+  },
+
+  // ── Getting-started checklist ──
+  checklistCard: {
+    backgroundColor: C.accentLight,
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: C.accent,
+    gap: 10,
+  },
+  checklistRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  checklistCheck: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: C.surface,
+    borderWidth: 1,
+    borderColor: C.accent,
+    textAlign: "center",
+    lineHeight: 25,
+    fontSize: 13,
+    fontWeight: "800",
+    color: C.accent,
+    overflow: "hidden",
+  },
+  checklistCheckDone: {
+    backgroundColor: C.primary,
+    borderColor: C.primary,
+    color: "#fff",
+  },
+  checklistLabel: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: "700",
+    color: C.text,
+  },
+  checklistLabelDone: {
+    textDecorationLine: "line-through",
+    color: C.textMuted,
+  },
+
+  // ── Analytics ──
+  analyticsHeader: {
+    fontSize: 18,
+    fontWeight: "800",
+    color: C.text,
+    marginTop: 12,
+    marginBottom: 10,
+    letterSpacing: 0.2,
+  },
+  analyticsCard: {
+    backgroundColor: C.surface,
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: C.border,
+    boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
+    elevation: 1,
+  },
+  analyticsCardTitle: {
+    fontSize: 15,
+    fontWeight: "800",
+    color: C.text,
+    marginBottom: 8,
+  },
+  analyticsGroupLabel: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: C.textMuted,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+    marginTop: 8,
+    marginBottom: 4,
+  },
+  barRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 5,
+  },
+  barLabel: {
+    width: 84,
+    fontSize: 12,
+    color: C.textSub,
+    fontWeight: "600",
+  },
+  barTrack: {
+    flex: 1,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: C.divider,
+    overflow: "hidden",
+  },
+  barFill: {
+    height: "100%",
+    borderRadius: 5,
+    minWidth: 2,
+  },
+  barCount: {
+    width: 26,
+    textAlign: "right",
+    fontSize: 12,
+    fontWeight: "700",
+    color: C.text,
+  },
+  rateRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+  },
+  rateValue: {
+    fontSize: 34,
+    fontWeight: "800",
+    color: C.primary,
+  },
+  rateLabel: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: C.text,
+  },
+  rateSub: {
+    fontSize: 12,
+    color: C.textMuted,
+    marginTop: 2,
+  },
+  breederRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    paddingVertical: 6,
+  },
+  breederRank: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: C.primaryLight,
+    color: C.primary,
+    fontWeight: "800",
+    fontSize: 12,
+    textAlign: "center",
+    lineHeight: 22,
+    overflow: "hidden",
+  },
+  breederName: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: C.text,
+  },
+  breederSub: {
+    fontSize: 12,
+    color: C.textMuted,
+    marginTop: 1,
+  },
+  breederCount: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: C.primary,
+  },
+
+  // Read-only (vet) banner
+  roleBanner: {
+    backgroundColor: C.warningBg,
+    borderColor: C.warning,
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    marginBottom: 12,
+  },
+  roleBannerText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: C.warning,
+    textAlign: "center",
+  },
 });

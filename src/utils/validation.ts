@@ -66,3 +66,24 @@ export function validateHatchOrder(
   }
   return null;
 }
+
+/**
+ * Validates that a recurring schedule's end date is not before its start date.
+ * Missing/invalid dates are ignored (schema validation handles those). Returns
+ * null when valid, or a ValidationError otherwise.
+ */
+export function validateRecurrenceRange(
+  startDate: unknown,
+  endDate: unknown
+): ValidationError | null {
+  if (endDate === undefined || endDate === null || endDate === "") return null;
+  const start = new Date(startDate as string);
+  const end = new Date(endDate as string);
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+    return null;
+  }
+  if (end.getTime() < start.getTime()) {
+    return { message: "endDate cannot be before date" };
+  }
+  return null;
+}
