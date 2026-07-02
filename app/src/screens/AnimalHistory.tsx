@@ -5,7 +5,7 @@ import { FieldLabel } from "../components";
 import { useApp } from "../context";
 import { DatePickerField } from "../datepicker";
 import { useConfirmDelete } from "../hooks";
-import { toIsoDateOnly } from "../helpers";
+import { todayIso, toIsoDateOnly } from "../helpers";
 import { fmt } from "../i18n";
 import { qk, useAnimalEvents } from "../queries";
 import { styles } from "../styles";
@@ -17,11 +17,6 @@ const TYPE_ICONS: Record<HealthEventType, string> = {
   health: "🩺",
   breeding: "❤️",
   note: "📝",
-};
-
-const todayIso = () => {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 };
 
 export function AnimalHistoryModal({ animal, onClose }: { animal: Animal | null; onClose: () => void }) {

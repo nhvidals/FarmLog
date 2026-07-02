@@ -5,7 +5,7 @@ import { Badge, EmptyState, FieldLabel, SectionHeader } from "../components";
 import { AnimalSort, AnimalSubTab, useApp } from "../context";
 import { AnimalHistoryModal } from "./AnimalHistory";
 import { DatePickerField } from "../datepicker";
-import { categoryOf, isDate, ringOf, statusOf, toIsoDateOnly } from "../helpers";
+import { categoryOf, isDate, ringOf, statusOf, todayIso, toIsoDateOnly } from "../helpers";
 import { fmt } from "../i18n";
 import { useAnimals, useAnimalTypes, useInvalidateFarmData } from "../queries";
 import { styles } from "../styles";
@@ -64,7 +64,7 @@ export function AnimalsScreen(view: AnimalsViewState) {
   const [editingAnimal, setEditingAnimal] = useState<Animal | null>(null);
   const [animalName, setAnimalName] = useState("");
   const [animalDesignation, setAnimalDesignation] = useState("");
-  const [animalBirthDate, setAnimalBirthDate] = useState("2026-01-01");
+  const [animalBirthDate, setAnimalBirthDate] = useState(todayIso());
   const [animalSex, setAnimalSex] = useState<Sex>("female");
   const [animalRingNumber, setAnimalRingNumber] = useState("");
   const [animalFatherId, setAnimalFatherId] = useState("");
@@ -88,7 +88,7 @@ export function AnimalsScreen(view: AnimalsViewState) {
     setEditingAnimal(null);
     setAnimalName("");
     setAnimalDesignation("");
-    setAnimalBirthDate("2026-01-01");
+    setAnimalBirthDate(todayIso());
     setAnimalSex("female");
     setAnimalRingNumber("");
     setAnimalFatherId("");
