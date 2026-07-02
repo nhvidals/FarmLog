@@ -26,3 +26,10 @@ export type AssignableFarmRole = (typeof ASSIGNABLE_FARM_ROLES)[number];
  */
 export const MEDICATION_FREQUENCIES = ["once", "daily", "weekly", "monthly"] as const;
 export type MedicationFrequency = (typeof MEDICATION_FREQUENCIES)[number];
+
+/**
+ * Kinds of entry in an animal's health/history timeline. `weight` carries a
+ * numeric `value` (kg); the others are described by a free-text `note`.
+ */
+export const HEALTH_EVENT_TYPES = ["weight", "health", "breeding", "note"] as const;
+export type HealthEventType = (typeof HEALTH_EVENT_TYPES)[number];

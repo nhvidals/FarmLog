@@ -257,6 +257,24 @@ export const translations = {
     endDateLabel: "Termina em (opcional)",
     recurringEvery: "A cada {n} {unit}",
 
+    // Health / history timeline
+    history: "Historico",
+    historyTitle: "Historico de {name}",
+    addEvent: "Adicionar registo",
+    eventTypeLabel: "Tipo de registo",
+    weightValueLabel: "Peso (kg)",
+    eventNoteLabel: "Descricao",
+    noEvents: "Sem registos ainda.",
+    latestWeight: "Peso mais recente",
+    saveEvent: "Guardar registo",
+    successEventAdded: "Registo adicionado.",
+    successEventRemoved: "Registo eliminado.",
+    errAddEvent: "Nao foi possivel adicionar o registo.",
+    errRemoveEvent: "Nao foi possivel eliminar o registo.",
+    valEventFields: "Preencha os campos do registo.",
+    confirmRemoveEventTitle: "Eliminar registo",
+    confirmRemoveEventMsg: "Eliminar este registo?",
+
     // Members / roles
     manageMembers: "Gerir membros",
     membersTitle: "Membros da quinta",
@@ -304,6 +322,12 @@ export const translations = {
       daily: "dias",
       weekly: "semanas",
       monthly: "meses",
+    },
+    eventTypeLabels: {
+      weight: "Peso",
+      health: "Saude",
+      breeding: "Reproducao",
+      note: "Nota",
     },
   },
   en: {
@@ -562,6 +586,24 @@ export const translations = {
     endDateLabel: "Ends on (optional)",
     recurringEvery: "Every {n} {unit}",
 
+    // Health / history timeline
+    history: "History",
+    historyTitle: "{name}'s history",
+    addEvent: "Add entry",
+    eventTypeLabel: "Entry type",
+    weightValueLabel: "Weight (kg)",
+    eventNoteLabel: "Description",
+    noEvents: "No entries yet.",
+    latestWeight: "Latest weight",
+    saveEvent: "Save entry",
+    successEventAdded: "Entry added.",
+    successEventRemoved: "Entry deleted.",
+    errAddEvent: "Could not add the entry.",
+    errRemoveEvent: "Could not delete the entry.",
+    valEventFields: "Fill in the entry fields.",
+    confirmRemoveEventTitle: "Delete entry",
+    confirmRemoveEventMsg: "Delete this entry?",
+
     // Members / roles
     manageMembers: "Manage members",
     membersTitle: "Farm members",
@@ -609,6 +651,12 @@ export const translations = {
       daily: "days",
       weekly: "weeks",
       monthly: "months",
+    },
+    eventTypeLabels: {
+      weight: "Weight",
+      health: "Health",
+      breeding: "Breeding",
+      note: "Note",
     },
   },
 } as const;

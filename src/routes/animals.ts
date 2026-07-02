@@ -1,9 +1,11 @@
 import { Router } from "express";
 import mongoose from "mongoose";
 import { AnimalModel } from "../models/Animal";
+import { HealthEventModel } from "../models/HealthEvent";
 import { getFarmIdFromRequest } from "../utils/farmContext";
 import { serverError, stripImmutableFields } from "../utils/http";
 import { validateAnimalParents } from "../utils/validation";
+import { HEALTH_EVENT_TYPES } from "../types/domain";
 
 export const animalsRouter = Router();
 
@@ -85,9 +87,81 @@ animalsRouter.delete("/:id", async (req, res) => {
   try {
     const deleted = await AnimalModel.findOneAndDelete({ _id: req.params.id, farmId });
     if (!deleted) return res.status(404).json({ message: "Animal not found" });
+    // Cascade: an animal's history timeline goes with it.
+    await HealthEventModel.deleteMany({ farmId, animalId: req.params.id });
     return res.status(204).send();
   } catch (error) {
     return res.status(404).json({ message: "Animal not found" });
+  }
+});
+
+// ── Health / history timeline ────────────────────────────────────────────────
+
+/** Ensures the :id param is a valid animal in the caller's farm. */
+async function ensureAnimal(req: import("express").Request, res: import("express").Response, farmId: string): Promise<boolean> {
+  if (!mongoose.isValidObjectId(req.params.id)) {
+    res.status(404).json({ message: "Animal not found" });
+    return false;
+  }
+  const exists = await AnimalModel.exists({ _id: req.params.id, farmId });
+  if (!exists) {
+    res.status(404).json({ message: "Animal not found" });
+    return false;
+  }
+  return true;
+}
+
+animalsRouter.get("/:id/events", async (req, res) => {
+  const farmId = await getFarmIdFromRequest(req, res);
+  if (!farmId) return;
+  if (!(await ensureAnimal(req, res, farmId))) return;
+
+  try {
+    const events = await HealthEventModel.find({ farmId, animalId: req.params.id })
+      .sort({ date: -1, createdAt: -1 })
+      .lean();
+    return res.json(events);
+  } catch (error) {
+    return serverError(res);
+  }
+});
+
+animalsRouter.post("/:id/events", async (req, res) => {
+  const farmId = await getFarmIdFromRequest(req, res);
+  if (!farmId) return;
+  if (!(await ensureAnimal(req, res, farmId))) return;
+
+  const { type, date, value, note } = req.body ?? {};
+  if (!HEALTH_EVENT_TYPES.includes(type)) {
+    return res.status(400).json({ message: "Invalid event type" });
+  }
+  // A weight entry is meaningless without a positive number.
+  if (type === "weight" && (typeof value !== "number" || !Number.isFinite(value) || value <= 0)) {
+    return res.status(400).json({ message: "weight requires a positive numeric value" });
+  }
+
+  try {
+    const created = await HealthEventModel.create({ farmId, animalId: req.params.id, type, date, value, note });
+    return res.status(201).json(created);
+  } catch (error) {
+    return res.status(400).json({ message: "Invalid event payload" });
+  }
+});
+
+animalsRouter.delete("/:id/events/:eventId", async (req, res) => {
+  const farmId = await getFarmIdFromRequest(req, res);
+  if (!farmId) return;
+
+  try {
+    const deleted = await HealthEventModel.findOneAndDelete({
+      _id: req.params.eventId,
+      farmId,
+      animalId: req.params.id
+    });
+    if (!deleted) return res.status(404).json({ message: "Event not found" });
+    return res.status(204).send();
+  } catch (error) {
+    return res.status(404).json({ message: "Event not found" });
   }
 });
 

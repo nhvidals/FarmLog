@@ -865,6 +865,77 @@ export const styles = StyleSheet.create({
     gap: 4,
   },
 
+  // ── Animal history timeline ──
+  weightSummary: {
+    flexDirection: "row",
+    alignItems: "baseline",
+    gap: 8,
+    backgroundColor: C.primaryLight,
+    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    marginTop: 4,
+  },
+  weightSummaryLabel: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: C.textSub,
+    textTransform: "uppercase",
+    letterSpacing: 0.4,
+  },
+  weightSummaryValue: {
+    fontSize: 20,
+    fontWeight: "800",
+    color: C.primary,
+  },
+  weightSummaryDate: {
+    fontSize: 12,
+    color: C.textMuted,
+    marginLeft: "auto",
+  },
+  eventForm: {
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: C.divider,
+    gap: 2,
+  },
+  eventRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    backgroundColor: C.bg,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: C.border,
+    padding: 10,
+  },
+  eventRowIcon: {
+    fontSize: 20,
+  },
+  eventRowType: {
+    fontSize: 13,
+    fontWeight: "800",
+    color: C.text,
+  },
+  eventRowDesc: {
+    fontSize: 13,
+    color: C.textSub,
+    marginTop: 1,
+  },
+  eventRowDate: {
+    fontSize: 11,
+    color: C.textMuted,
+    fontWeight: "600",
+  },
+  eventRemoveBtn: {
+    paddingHorizontal: 6,
+    paddingVertical: 4,
+  },
+  eventRemoveText: {
+    fontSize: 14,
+  },
+
   // ── Onboarding (first run) ──
   onbRoot: {
     flex: 1,

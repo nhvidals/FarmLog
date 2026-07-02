@@ -5,6 +5,7 @@ import { FarmMembershipModel } from "../models/FarmMembership";
 import { UserModel } from "../models/User";
 import { AnimalModel } from "../models/Animal";
 import { AnimalTypeModel } from "../models/AnimalType";
+import { HealthEventModel } from "../models/HealthEvent";
 import { IncubationBatchModel } from "../models/IncubationBatch";
 import { MedicationScheduleModel } from "../models/MedicationSchedule";
 import { serverError } from "../utils/http";
@@ -69,6 +70,7 @@ farmsRouter.delete("/:id", async (req, res) => {
       AnimalTypeModel.deleteMany({ farmId }),
       IncubationBatchModel.deleteMany({ farmId }),
       MedicationScheduleModel.deleteMany({ farmId }),
+      HealthEventModel.deleteMany({ farmId }),
       FarmMembershipModel.deleteMany({ farmId }),
     ]);
 

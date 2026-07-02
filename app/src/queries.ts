@@ -1,5 +1,5 @@
 import { QueryClient, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Animal, AnimalType, Farm, FarmMember, IncubationBatch, MedicationSchedule } from "./types";
+import { Animal, AnimalType, Farm, FarmMember, HealthEvent, IncubationBatch, MedicationSchedule } from "./types";
 
 /**
  * Minimal shape of the axios client returned by `createApi`. Declared
@@ -35,6 +35,7 @@ export const qk = {
   medication: (farmId: string) => ["medication", farmId] as const,
   tree: (farmId: string, ring: string) => ["tree", farmId, ring] as const,
   members: (farmId: string) => ["members", farmId] as const,
+  events: (farmId: string, animalId: string) => ["events", farmId, animalId] as const,
 };
 
 // ── Queries ───────────────────────────────────────────────────────────────
@@ -83,6 +84,14 @@ export function useFarmMembers(farmsApi: ApiClient, farmId: string, enabled: boo
     queryKey: qk.members(farmId),
     queryFn: async () => (await farmsApi.get<FarmMember[]>(`/farms/${farmId}/members`)).data,
     enabled: enabled && !!farmId,
+  });
+}
+
+export function useAnimalEvents(api: ApiClient, farmId: string, animalId: string, enabled: boolean) {
+  return useQuery({
+    queryKey: qk.events(farmId, animalId),
+    queryFn: async () => (await api.get<HealthEvent[]>(`/animals/${animalId}/events`)).data,
+    enabled: enabled && !!farmId && !!animalId,
   });
 }
 

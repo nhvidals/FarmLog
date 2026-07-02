@@ -16,6 +16,19 @@ export type AssignableFarmRole = (typeof ASSIGNABLE_FARM_ROLES)[number];
 export const MEDICATION_FREQUENCIES = ["once", "daily", "weekly", "monthly"] as const;
 export type MedicationFrequency = (typeof MEDICATION_FREQUENCIES)[number];
 
+export const HEALTH_EVENT_TYPES = ["weight", "health", "breeding", "note"] as const;
+export type HealthEventType = (typeof HEALTH_EVENT_TYPES)[number];
+
+export interface HealthEvent {
+  _id: string;
+  farmId: string;
+  animalId: string;
+  type: HealthEventType;
+  date: string;
+  value?: number;
+  note?: string;
+}
+
 export interface Farm {
   _id: string;
   name: string;

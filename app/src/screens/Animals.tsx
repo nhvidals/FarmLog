@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { ActivityIndicator, Image, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { Badge, EmptyState, FieldLabel, SectionHeader } from "../components";
 import { AnimalSort, AnimalSubTab, useApp } from "../context";
+import { AnimalHistoryModal } from "./AnimalHistory";
 import { DatePickerField } from "../datepicker";
 import { categoryOf, isDate, ringOf, statusOf, toIsoDateOnly } from "../helpers";
 import { fmt } from "../i18n";
@@ -77,6 +78,9 @@ export function AnimalsScreen(view: AnimalsViewState) {
   const [showTypeForm, setShowTypeForm] = useState(false);
   const [typeName, setTypeName] = useState("");
   const [typeCategory, setTypeCategory] = useState<AnimalCategory>("oviparous");
+
+  // Animal whose history timeline is open.
+  const [historyAnimal, setHistoryAnimal] = useState<Animal | null>(null);
 
   const catOf = (designation?: string) => categoryOf(animalTypes, designation);
 
@@ -589,22 +593,29 @@ export function AnimalsScreen(view: AnimalsViewState) {
                     <Text style={styles.cardMetaText}>🔖 {animal.ringNumber}</Text>
                     <Text style={styles.cardMetaText}>📅 {toIsoDateOnly(animal.birthDate)}</Text>
                   </View>
-                  {canWrite && (
-                    <View style={styles.cardActions}>
-                      <Pressable style={styles.cardActionBtn} onPress={() => startEditAnimal(animal)}>
-                        <Text style={styles.cardActionBtnText}>✏️ {t.edit}</Text>
-                      </Pressable>
-                      <Pressable style={[styles.cardActionBtn, styles.cardActionBtnDanger]} onPress={() => deleteAnimal(animal._id, animal.name)}>
-                        <Text style={[styles.cardActionBtnText, styles.cardActionBtnTextDanger]}>🗑 {t.delete}</Text>
-                      </Pressable>
-                    </View>
-                  )}
+                  <View style={styles.cardActions}>
+                    <Pressable style={styles.cardActionBtn} onPress={() => setHistoryAnimal(animal)}>
+                      <Text style={styles.cardActionBtnText}>📈 {t.history}</Text>
+                    </Pressable>
+                    {canWrite && (
+                      <>
+                        <Pressable style={styles.cardActionBtn} onPress={() => startEditAnimal(animal)}>
+                          <Text style={styles.cardActionBtnText}>✏️ {t.edit}</Text>
+                        </Pressable>
+                        <Pressable style={[styles.cardActionBtn, styles.cardActionBtnDanger]} onPress={() => deleteAnimal(animal._id, animal.name)}>
+                          <Text style={[styles.cardActionBtnText, styles.cardActionBtnTextDanger]}>🗑 {t.delete}</Text>
+                        </Pressable>
+                      </>
+                    )}
+                  </View>
                 </View>
               );
             })
           )}
         </View>
       )}
+
+      <AnimalHistoryModal animal={historyAnimal} onClose={() => setHistoryAnimal(null)} />
     </View>
   );
 }
