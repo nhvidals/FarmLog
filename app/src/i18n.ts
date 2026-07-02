@@ -218,6 +218,28 @@ export const translations = {
     loading: "A carregar...",
     retry: "Tentar novamente",
 
+    // Onboarding / first run
+    onboardingWelcome: "Bem-vindo a Gestao da Quinta",
+    onboardingSubtitle: "Comece por criar a sua primeira quinta.",
+    onboardingFeature1: "Registe animais, fotos e genealogia",
+    onboardingFeature2: "Faca a gestao de incubacao e eclosoes",
+    onboardingFeature3: "Agende medicacoes com lembretes",
+    onboardingCreateTitle: "Criar a primeira quinta",
+    onboardingSampleTitle: "Ou experimente com dados de exemplo",
+    onboardingSampleDesc: "Cria uma quinta com tipos e animais de exemplo para explorar a app.",
+    onboardingSampleBtn: "Criar quinta de demonstracao",
+    onboardingSeeding: "A preparar a sua quinta...",
+    errOnboarding: "Nao foi possivel preparar a quinta de exemplo.",
+    sampleFarmName: "Quinta Demonstracao",
+    sampleFarmLocation: "Portugal",
+    sampleTypeChicken: "Galinha",
+    sampleTypeGoat: "Cabra",
+
+    // Getting-started checklist (empty farm)
+    dashGetStarted: "Primeiros passos",
+    dashStepType: "Criar um tipo de animal",
+    dashStepAnimal: "Adicionar o primeiro animal",
+
     // Members / roles
     manageMembers: "Gerir membros",
     membersTitle: "Membros da quinta",
@@ -472,6 +494,28 @@ export const translations = {
     // Loading / error
     loading: "Loading...",
     retry: "Retry",
+
+    // Onboarding / first run
+    onboardingWelcome: "Welcome to Farm Management",
+    onboardingSubtitle: "Start by creating your first farm.",
+    onboardingFeature1: "Track animals, photos and genealogy",
+    onboardingFeature2: "Manage incubation and hatching",
+    onboardingFeature3: "Schedule medications with reminders",
+    onboardingCreateTitle: "Create your first farm",
+    onboardingSampleTitle: "Or try it with sample data",
+    onboardingSampleDesc: "Creates a farm with sample types and animals so you can explore the app.",
+    onboardingSampleBtn: "Create a demo farm",
+    onboardingSeeding: "Setting up your farm...",
+    errOnboarding: "Could not set up the sample farm.",
+    sampleFarmName: "Demo Farm",
+    sampleFarmLocation: "Portugal",
+    sampleTypeChicken: "Chicken",
+    sampleTypeGoat: "Goat",
+
+    // Getting-started checklist (empty farm)
+    dashGetStarted: "Get started",
+    dashStepType: "Create an animal type",
+    dashStepAnimal: "Add your first animal",
 
     // Members / roles
     manageMembers: "Manage members",

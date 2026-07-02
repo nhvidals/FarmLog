@@ -865,6 +865,110 @@ export const styles = StyleSheet.create({
     gap: 4,
   },
 
+  // ── Onboarding (first run) ──
+  onbRoot: {
+    flex: 1,
+    backgroundColor: C.bg,
+  },
+  onbTopBar: {
+    backgroundColor: C.primaryDark,
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 12,
+    flexDirection: "row",
+    justifyContent: "flex-end",
+  },
+  onbScroll: {
+    padding: 20,
+    paddingBottom: 40,
+    gap: 4,
+  },
+  onbEmoji: {
+    fontSize: 48,
+    textAlign: "center",
+    marginTop: 8,
+  },
+  onbTitle: {
+    fontSize: 24,
+    fontWeight: "800",
+    color: C.text,
+    textAlign: "center",
+    marginTop: 8,
+  },
+  onbSubtitle: {
+    fontSize: 15,
+    color: C.textSub,
+    textAlign: "center",
+    marginTop: 4,
+    marginBottom: 16,
+  },
+  onbFeatures: {
+    gap: 10,
+    marginBottom: 16,
+    paddingHorizontal: 4,
+  },
+  onbFeatureRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  onbFeatureIcon: {
+    fontSize: 22,
+    width: 30,
+    textAlign: "center",
+  },
+  onbFeatureText: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: "600",
+    color: C.textSub,
+  },
+
+  // ── Getting-started checklist ──
+  checklistCard: {
+    backgroundColor: C.accentLight,
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: C.accent,
+    gap: 10,
+  },
+  checklistRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  checklistCheck: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: C.surface,
+    borderWidth: 1,
+    borderColor: C.accent,
+    textAlign: "center",
+    lineHeight: 25,
+    fontSize: 13,
+    fontWeight: "800",
+    color: C.accent,
+    overflow: "hidden",
+  },
+  checklistCheckDone: {
+    backgroundColor: C.primary,
+    borderColor: C.primary,
+    color: "#fff",
+  },
+  checklistLabel: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: "700",
+    color: C.text,
+  },
+  checklistLabelDone: {
+    textDecorationLine: "line-through",
+    color: C.textMuted,
+  },
+
   // Read-only (vet) banner
   roleBanner: {
     backgroundColor: C.warningBg,

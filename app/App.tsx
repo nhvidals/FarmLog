@@ -34,6 +34,7 @@ import { GenealogyScreen } from "./src/screens/Genealogy";
 import { IncubationScreen } from "./src/screens/Incubation";
 import { MedicationScreen } from "./src/screens/Medication";
 import { MembersModal } from "./src/screens/Members";
+import { OnboardingScreen } from "./src/screens/Onboarding";
 import { clearSession, loadSession, saveSession } from "./src/storage";
 import { styles } from "./src/styles";
 import { C } from "./src/theme";
@@ -214,6 +215,35 @@ function AppInner() {
     }
   };
 
+  // First-run: create the user's first farm, then select it.
+  const onboardCreateFarm = async (name: string, location: string) => {
+    const res = await farmsApi.post<Farm>("/farms", { name, location: location || undefined });
+    await farmsQuery.refetch();
+    setSelectedFarmId(res.data._id);
+  };
+
+  // First-run: create a demo farm seeded with sample types, animals (including a
+  // genealogy link), an incubation batch and a medication, then select it.
+  const onboardSeedSample = async () => {
+    const res = await farmsApi.post<Farm>("/farms", { name: t.sampleFarmName, location: t.sampleFarmLocation });
+    const farm = res.data;
+    const seedApi = createApi(apiBaseUrl, farm._id, token, handleLogout) as unknown as ApiClient;
+
+    await seedApi.post("/animal-types", { name: t.sampleTypeChicken, category: "oviparous" });
+    await seedApi.post("/animal-types", { name: t.sampleTypeGoat, category: "viviparous" });
+
+    await seedApi.post("/animals", { name: "Rex", designation: t.sampleTypeChicken, birthDate: "2025-03-10", sex: "male", ringNumber: "GAL-001" });
+    const hen = await seedApi.post<{ _id: string }>("/animals", { name: "Bella", designation: t.sampleTypeChicken, birthDate: "2025-03-12", sex: "female", ringNumber: "GAL-002" });
+    await seedApi.post("/animals", { name: "Pip", designation: t.sampleTypeChicken, birthDate: "2026-05-01", sex: "female", ringNumber: "GAL-003", fatherId: "GAL-001", motherId: "GAL-002" });
+    await seedApi.post("/animals", { name: "Nanny", designation: t.sampleTypeGoat, birthDate: "2024-11-20", sex: "female", ringNumber: "CAB-001" });
+
+    await seedApi.post("/incubation", { species: t.sampleTypeChicken, eggCount: 12, incubatorName: "Incubadora A", startDate: "2026-06-20", expectedHatchDate: "2026-07-11" });
+    await seedApi.post("/medication", { animalId: hen.data._id, medicineName: "Multivitamin", dose: "1 ml", date: "2026-07-05" });
+
+    await farmsQuery.refetch();
+    setSelectedFarmId(farm._id);
+  };
+
   const deleteFarm = (farmId: string, name: string) => {
     setConfirm({
       title: t.confirmDeleteFarmTitle,
@@ -278,6 +308,34 @@ function AppInner() {
           apiBaseUrl={apiBaseUrl}
           setApiBaseUrl={setApiBaseUrl}
           onAuthenticated={handleAuthenticated}
+        />
+      </SafeAreaView>
+    );
+  }
+
+  // While the initial farm list loads, show a splash so we don't flash the
+  // onboarding or main UI before we know whether the user has any farms.
+  if (farmsQuery.isLoading) {
+    return (
+      <SafeAreaView style={[styles.safeArea, { alignItems: "center", justifyContent: "center" }]}>
+        <StatusBar style="dark" />
+        <ActivityIndicator size="large" color={C.primary} />
+      </SafeAreaView>
+    );
+  }
+
+  // First-run gate: a signed-in user with no farms gets the onboarding flow.
+  if (farmsQuery.isSuccess && farms.length === 0) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <StatusBar style="dark" />
+        <OnboardingScreen
+          t={t}
+          lang={lang}
+          setLang={setLang}
+          onLogout={handleLogout}
+          onCreateFarm={onboardCreateFarm}
+          onSeedSample={onboardSeedSample}
         />
       </SafeAreaView>
     );

@@ -15,7 +15,7 @@ const EVENT_ICON: Record<string, string> = {
 };
 
 export function DashboardScreen({ userEmail, farmName }: { userEmail: string; farmName?: string }) {
-  const { t, api, farmId, token, setTab, setAnimalSubTab, focusAnimals } = useApp();
+  const { t, api, farmId, token, canWrite, setTab, setAnimalSubTab, focusAnimals } = useApp();
 
   const { data: animals = [] } = useAnimals(api, farmId, token);
   const { data: animalTypes = [] } = useAnimalTypes(api, farmId, token);
@@ -72,6 +72,30 @@ export function DashboardScreen({ userEmail, farmName }: { userEmail: string; fa
               <Text style={styles.statLabel}>{t.dashIncubating}</Text>
             </Pressable>
           </View>
+
+          {canWrite && animals.length === 0 && (
+            <View style={styles.checklistCard}>
+              <Text style={styles.formCardTitle}>{t.dashGetStarted}</Text>
+              <Pressable
+                style={styles.checklistRow}
+                onPress={() => { setTab("animais"); setAnimalSubTab("tipos"); }}
+              >
+                <Text style={[styles.checklistCheck, animalTypes.length > 0 && styles.checklistCheckDone]}>
+                  {animalTypes.length > 0 ? "✓" : "1"}
+                </Text>
+                <Text style={[styles.checklistLabel, animalTypes.length > 0 && styles.checklistLabelDone]}>
+                  {t.dashStepType}
+                </Text>
+              </Pressable>
+              <Pressable
+                style={styles.checklistRow}
+                onPress={() => { setTab("animais"); setAnimalSubTab("animais"); }}
+              >
+                <Text style={styles.checklistCheck}>2</Text>
+                <Text style={styles.checklistLabel}>{t.dashStepAnimal}</Text>
+              </Pressable>
+            </View>
+          )}
 
           <SectionHeader title={t.dashUpcoming} count={stats.upcoming.length} />
           {stats.upcoming.length === 0 ? (

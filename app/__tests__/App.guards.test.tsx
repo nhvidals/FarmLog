@@ -117,35 +117,35 @@ describe("App session persistence", () => {
   });
 });
 
-describe("App farm guards", () => {
+describe("Onboarding (no farms)", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockLogin.mockResolvedValue({ token: "test-token", user: { id: "u1", email: "owner@example.com" } });
     mockFarmsClient.get.mockResolvedValue({ data: [] });
+    mockFarmsClient.post.mockResolvedValue({ data: { _id: "f-new", name: "My Farm" } });
     mockDataClient.get.mockResolvedValue({ data: [] });
-    mockDataClient.post.mockResolvedValue({ data: {} });
   });
 
-  it("blocks export when no farm is selected and shows a toast", async () => {
+  it("shows the onboarding welcome and hides the main tabs when the user has no farms", async () => {
     const screen = await signIn();
 
-    fireEvent.press(screen.getByText("Dados"));
-    fireEvent.press(screen.getAllByText("Exportar JSON")[1]);
-
-    // Feedback is now an in-app toast (Alert.alert is a no-op on web).
-    await screen.findByText("Selecione uma quinta.");
-    expect(mockDataClient.get).not.toHaveBeenCalledWith("/data/export");
+    // The first-run flow takes over instead of the empty tabbed UI.
+    await screen.findByText("Bem-vindo a Gestao da Quinta");
+    expect(screen.queryByText("Dados")).toBeNull();
   });
 
-  it("blocks import when no farm is selected and shows a toast", async () => {
+  it("creates the first farm from the onboarding form", async () => {
     const screen = await signIn();
 
-    fireEvent.press(screen.getByText("Dados"));
-    fireEvent.press(screen.getAllByText("Importar JSON")[1]);
+    fireEvent.changeText(await screen.findByPlaceholderText("Nova quinta"), "My Farm");
+    fireEvent.press(screen.getByText("Criar Quinta"));
 
-    await screen.findByText("Selecione uma quinta.");
-    expect(mockGetDocumentAsync).not.toHaveBeenCalled();
-    expect(mockDataClient.post).not.toHaveBeenCalledWith("/data/import", expect.anything());
+    await waitFor(() => {
+      expect(mockFarmsClient.post).toHaveBeenCalledWith(
+        "/farms",
+        expect.objectContaining({ name: "My Farm" }),
+      );
+    });
   });
 });
 
