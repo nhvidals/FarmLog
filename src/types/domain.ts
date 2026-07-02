@@ -33,3 +33,15 @@ export type MedicationFrequency = (typeof MEDICATION_FREQUENCIES)[number];
  */
 export const HEALTH_EVENT_TYPES = ["weight", "health", "breeding", "note"] as const;
 export type HealthEventType = (typeof HEALTH_EVENT_TYPES)[number];
+
+/**
+ * Append-only history ("what actually happened"). `medication` entries record a
+ * dose that was given or skipped; `incubation` entries record a batch's outcome.
+ * Entries are denormalized (they copy the names/values they need) so they remain
+ * meaningful even after the source schedule/batch is edited or deleted.
+ */
+export const LOG_KINDS = ["medication", "incubation"] as const;
+export type LogKind = (typeof LOG_KINDS)[number];
+
+export const ADMIN_STATUSES = ["given", "skipped"] as const;
+export type AdminStatus = (typeof ADMIN_STATUSES)[number];

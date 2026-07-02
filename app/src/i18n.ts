@@ -300,6 +300,16 @@ export const translations = {
     confirmRemoveEventTitle: "Eliminar registo",
     confirmRemoveEventMsg: "Eliminar este registo?",
 
+    // Administration log / activity history
+    logDose: "Registar dose",
+    logDoseTitle: "Registar administracao",
+    dosesLogged: "{n} registadas",
+    successDoseLogged: "Administracao registada.",
+    errLogDose: "Nao foi possivel registar a administracao.",
+    historyLog: "Historico de atividade",
+    historyLogDesc: "Registo permanente de administracoes e resultados, para analise.",
+    noLogEntries: "Sem registos de atividade.",
+
     // Members / roles
     manageMembers: "Gerir membros",
     membersTitle: "Membros da quinta",
@@ -353,6 +363,10 @@ export const translations = {
       health: "Saude",
       breeding: "Reproducao",
       note: "Nota",
+    },
+    adminStatusLabels: {
+      given: "Administrada",
+      skipped: "Ignorada",
     },
   },
   en: {
@@ -654,6 +668,16 @@ export const translations = {
     confirmRemoveEventTitle: "Delete entry",
     confirmRemoveEventMsg: "Delete this entry?",
 
+    // Administration log / activity history
+    logDose: "Log dose",
+    logDoseTitle: "Log administration",
+    dosesLogged: "{n} logged",
+    successDoseLogged: "Administration logged.",
+    errLogDose: "Could not log the administration.",
+    historyLog: "Activity history",
+    historyLogDesc: "A permanent record of administrations and outcomes, for analysis.",
+    noLogEntries: "No activity logged yet.",
+
     // Members / roles
     manageMembers: "Manage members",
     membersTitle: "Farm members",
@@ -707,6 +731,10 @@ export const translations = {
       health: "Health",
       breeding: "Breeding",
       note: "Note",
+    },
+    adminStatusLabels: {
+      given: "Given",
+      skipped: "Skipped",
     },
   },
 } as const;

@@ -1,21 +1,47 @@
+import { useQueryClient } from "@tanstack/react-query";
 import * as DocumentPicker from "expo-document-picker";
 import * as FileSystem from "expo-file-system/legacy";
+import { useState } from "react";
 import { Platform, Pressable, Text, View } from "react-native";
-import { SectionHeader } from "../components";
+import { EmptyState, SectionHeader } from "../components";
 import { useApp } from "../context";
-import { useAnimals, useIncubation, useInvalidateFarmData, useMedication } from "../queries";
-import { buildIncubationCsv, buildInventoryCsv, buildTreatmentCsv } from "../reports";
+import { toIsoDateOnly } from "../helpers";
+import { qk, useAnimals, useIncubation, useInvalidateFarmData, useLog, useMedication } from "../queries";
+import { buildIncubationCsv, buildInventoryCsv, buildLogCsv, buildTreatmentCsv } from "../reports";
 import { shareTextFile } from "../share";
 import { styles } from "../styles";
 import { C } from "../theme";
+import { LOG_KINDS, LogKind } from "../types";
 
 export function DataScreen() {
-  const { t, api, farmId, token, showToast, canWrite } = useApp();
+  const { t, api, farmId, token, showToast, confirm, canWrite } = useApp();
   const invalidate = useInvalidateFarmData(farmId);
+  const queryClient = useQueryClient();
 
   const { data: animals = [] } = useAnimals(api, farmId, token);
   const { data: medication = [] } = useMedication(api, farmId, token);
   const { data: incubation = [] } = useIncubation(api, farmId, token);
+  const { data: log = [] } = useLog(api, farmId, token);
+
+  const [logFilter, setLogFilter] = useState<LogKind | "all">("all");
+  const visibleLog = log.filter((e) => logFilter === "all" || e.kind === logFilter);
+
+  const deleteLogEntry = (id: string) => {
+    confirm({
+      title: t.confirmDeleteRecordTitle,
+      message: t.confirmDeleteRecordMsg,
+      confirmLabel: t.delete,
+      onConfirm: async () => {
+        try {
+          await api.delete(`/log/${id}`);
+          queryClient.invalidateQueries({ queryKey: qk.log(farmId) });
+          showToast("success", t.successDeleted);
+        } catch {
+          showToast("error", t.errDelete);
+        }
+      },
+    });
+  };
 
   const exportData = async () => {
     if (!farmId) { showToast("warning", t.valSelectFarm); return; }
@@ -82,10 +108,61 @@ export function DataScreen() {
       count: incubation.length,
       onPress: () => runReport("incubation", incubation, () => buildIncubationCsv(incubation, t)),
     },
+    {
+      icon: "🗒",
+      title: t.historyLog,
+      desc: t.historyLogDesc,
+      count: log.length,
+      onPress: () => runReport("history", log, () => buildLogCsv(log, t)),
+    },
   ];
 
   return (
     <View>
+      {/* ── Activity history (append-only log) ── */}
+      <SectionHeader title={t.historyLog} count={log.length} />
+      {log.length > 0 && (
+        <View style={[styles.chipWrapRow, { marginBottom: 8 }]}>
+          {(["all", ...LOG_KINDS] as const).map((k) => (
+            <Pressable
+              key={k}
+              style={[styles.chip, logFilter === k && styles.chipActive]}
+              onPress={() => setLogFilter(k)}
+            >
+              <Text style={[styles.chipText, logFilter === k && styles.chipTextActive]}>
+                {k === "all" ? t.filterAll : k === "medication" ? t.tabMedication : t.tabIncubation}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+      )}
+      {log.length === 0 ? (
+        <EmptyState icon="🗒" text={t.noLogEntries} />
+      ) : (
+        visibleLog.map((e) => (
+          <View
+            key={e._id}
+            style={[styles.card, { borderLeftColor: e.kind === "medication" ? C.danger : C.accent, flexDirection: "row", alignItems: "center", gap: 10 }]}
+          >
+            <Text style={{ fontSize: 20 }}>{e.kind === "medication" ? "💊" : "🥚"}</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.cardName}>{e.kind === "medication" ? e.medicineName : e.incubatorName}</Text>
+              <Text style={styles.cardSub}>
+                {e.kind === "medication"
+                  ? [e.animalName, e.status ? t.adminStatusLabels[e.status] : "", e.dose].filter(Boolean).join(" · ")
+                  : `${e.species ?? ""} · ${e.hatchedOk ?? 0}/${(e.hatchedOk ?? 0) + (e.hatchedNok ?? 0)}`}
+              </Text>
+            </View>
+            <Text style={styles.cardMetaText}>{toIsoDateOnly(e.date)}</Text>
+            {canWrite && (
+              <Pressable onPress={() => deleteLogEntry(e._id)} hitSlop={6} style={{ paddingHorizontal: 6 }}>
+                <Text style={{ fontSize: 14 }}>🗑</Text>
+              </Pressable>
+            )}
+          </View>
+        ))
+      )}
+
       {/* ── Reports (CSV) ── */}
       <SectionHeader title={t.reportsTitle} />
       {reports.map((r) => (

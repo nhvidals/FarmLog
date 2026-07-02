@@ -5,7 +5,8 @@ import { useApp } from "../context";
 import { DatePickerField } from "../datepicker";
 import { fmt } from "../i18n";
 import { isDate, toIsoDateOnly } from "../helpers";
-import { useAnimals, useInvalidateFarmData, useMedication } from "../queries";
+import { useAnimals, useInvalidateFarmData, useLog, useMedication } from "../queries";
+import { LogDoseModal } from "./LogDose";
 import { styles } from "../styles";
 import { C } from "../theme";
 import { MEDICATION_FREQUENCIES, MedicationFrequency, MedicationSchedule } from "../types";
@@ -16,7 +17,9 @@ export function MedicationScreen() {
 
   const { data: medicationList = [] } = useMedication(api, farmId, token);
   const { data: animals = [] } = useAnimals(api, farmId, token);
+  const { data: log = [] } = useLog(api, farmId, token);
 
+  const [logSchedule, setLogSchedule] = useState<MedicationSchedule | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [animalId, setAnimalId] = useState("");
@@ -97,6 +100,10 @@ export function MedicationScreen() {
       },
     });
   };
+
+  // How many administrations have been logged for a schedule.
+  const loggedCount = (id: string) =>
+    log.filter((l) => l.kind === "medication" && l.sourceId === id).length;
 
   // Human-readable recurrence label for a schedule, or null when one-off.
   const recurrenceLabel = (m: MedicationSchedule): string | null => {
@@ -210,20 +217,32 @@ export function MedicationScreen() {
               {recurrenceLabel(entry) && (
                 <Text style={styles.cardMetaText}>🔁 {recurrenceLabel(entry)}</Text>
               )}
+              {loggedCount(entry._id) > 0 && (
+                <Text style={styles.cardMetaText}>🗒 {fmt(t.dosesLogged, { n: String(loggedCount(entry._id)) })}</Text>
+              )}
             </View>
             {canWrite && (
-              <View style={styles.cardActions}>
-                <Pressable style={styles.cardActionBtn} onPress={() => startEdit(entry)}>
-                  <Text style={styles.cardActionBtnText}>✏️ {t.edit}</Text>
-                </Pressable>
-                <Pressable style={[styles.cardActionBtn, styles.cardActionBtnDanger]} onPress={() => remove(entry._id)}>
-                  <Text style={[styles.cardActionBtnText, styles.cardActionBtnTextDanger]}>🗑 {t.delete}</Text>
-                </Pressable>
-              </View>
+              <>
+                <View style={styles.cardActions}>
+                  <Pressable style={[styles.cardActionBtn, { backgroundColor: C.primaryLight, borderColor: C.primary }]} onPress={() => setLogSchedule(entry)}>
+                    <Text style={[styles.cardActionBtnText, { color: C.primary }]}>🗒 {t.logDose}</Text>
+                  </Pressable>
+                </View>
+                <View style={{ flexDirection: "row", gap: 8, marginTop: 8 }}>
+                  <Pressable style={styles.cardActionBtn} onPress={() => startEdit(entry)}>
+                    <Text style={styles.cardActionBtnText}>✏️ {t.edit}</Text>
+                  </Pressable>
+                  <Pressable style={[styles.cardActionBtn, styles.cardActionBtnDanger]} onPress={() => remove(entry._id)}>
+                    <Text style={[styles.cardActionBtnText, styles.cardActionBtnTextDanger]}>🗑 {t.delete}</Text>
+                  </Pressable>
+                </View>
+              </>
             )}
           </View>
         ))
       )}
+
+      <LogDoseModal schedule={logSchedule} onClose={() => setLogSchedule(null)} />
     </View>
   );
 }

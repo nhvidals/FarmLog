@@ -19,6 +19,31 @@ export type MedicationFrequency = (typeof MEDICATION_FREQUENCIES)[number];
 export const HEALTH_EVENT_TYPES = ["weight", "health", "breeding", "note"] as const;
 export type HealthEventType = (typeof HEALTH_EVENT_TYPES)[number];
 
+export const LOG_KINDS = ["medication", "incubation"] as const;
+export type LogKind = (typeof LOG_KINDS)[number];
+
+export const ADMIN_STATUSES = ["given", "skipped"] as const;
+export type AdminStatus = (typeof ADMIN_STATUSES)[number];
+
+export interface LogEntry {
+  _id: string;
+  farmId: string;
+  kind: LogKind;
+  date: string;
+  sourceId?: string;
+  note?: string;
+  animalId?: string;
+  animalName?: string;
+  medicineName?: string;
+  dose?: string;
+  status?: AdminStatus;
+  incubatorName?: string;
+  species?: string;
+  eggCount?: number;
+  hatchedOk?: number;
+  hatchedNok?: number;
+}
+
 export interface HealthEvent {
   _id: string;
   farmId: string;

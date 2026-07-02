@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { IncubationBatchModel } from "../models/IncubationBatch";
+import { LogEntryModel } from "../models/LogEntry";
 import { getFarmIdFromRequest } from "../utils/farmContext";
 import { serverError, stripImmutableFields } from "../utils/http";
 import { validateHatchOrder } from "../utils/validation";
@@ -70,6 +71,23 @@ incubationRouter.delete("/:id", async (req, res) => {
   try {
     const deleted = await IncubationBatchModel.findOneAndDelete({ _id: req.params.id, farmId });
     if (!deleted) return res.status(404).json({ message: "Batch not found" });
+
+    // Archive a completed batch's outcome to the append-only log so results are
+    // never lost when the batch is removed.
+    if (deleted.hatchedOk !== undefined || deleted.hatchedNok !== undefined) {
+      await LogEntryModel.create({
+        farmId,
+        kind: "incubation",
+        date: deleted.expectedHatchDate,
+        sourceId: deleted._id,
+        incubatorName: deleted.incubatorName,
+        species: deleted.species,
+        eggCount: deleted.eggCount,
+        hatchedOk: deleted.hatchedOk,
+        hatchedNok: deleted.hatchedNok
+      });
+    }
+
     return res.status(204).send();
   } catch (error) {
     return res.status(404).json({ message: "Batch not found" });

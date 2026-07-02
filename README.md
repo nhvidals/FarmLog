@@ -5,6 +5,7 @@ Farm and livestock management app with support for:
 - Animal records with photo, birth date, sex, designation, category (oviparous/viviparous), and ring number
 - Animal lifecycle status (active / sold / deceased) with status date and reason
 - Per-animal health/history timeline: weigh-ins (with latest-weight summary), health/vet events, breeding events, and notes
+- Append-only activity log: log medication doses as given/skipped; incubation outcomes are auto-archived when a completed batch is deleted, so history is never lost. Viewable, filterable and CSV-exportable for analysis
 - Home dashboard: headline counts and a 7-day upcoming-events feed
 - Animal list search, status/sex filters, and sorting (newest / name / ring)
 - In-app calendar date pickers for all date fields (no manual typing)
@@ -80,6 +81,7 @@ The API starts on `http://localhost:4000` by default.
 | GET | `/animals/:id/tree` | required | Genealogy tree |
 | GET / POST | `/animals/:id/events` | required | List / add health-timeline entries for an animal |
 | DELETE | `/animals/:id/events/:eventId` | required | Delete a health-timeline entry |
+| GET / POST / DELETE | `/log` | required | Append-only activity log (medication administrations, incubation outcomes) |
 | GET / POST / PUT / DELETE | `/incubation` | required | Incubation batch CRUD |
 | GET / POST / PUT / DELETE | `/medication` | required | Medication schedule CRUD |
 | GET | `/data/export` | required | Export farm data as JSON |

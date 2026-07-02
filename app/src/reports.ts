@@ -1,6 +1,6 @@
 import { toIsoDateOnly } from "./helpers";
 import { T } from "./i18n";
-import { Animal, IncubationBatch, MedicationSchedule } from "./types";
+import { Animal, IncubationBatch, LogEntry, MedicationSchedule } from "./types";
 
 /** Escapes one CSV field: quote it when it contains a comma, quote or newline. */
 const escapeField = (value: string): string =>
@@ -60,6 +60,33 @@ export const buildTreatmentCsv = (medication: MedicationSchedule[], t: T): strin
       toIsoDateOnly(m.endDate),
     ];
   });
+  return toCsv([header, ...rows]);
+};
+
+/** Activity log: the append-only history of administrations and outcomes. */
+export const buildLogCsv = (log: LogEntry[], t: T): string => {
+  const header = [
+    t.datePlaceholder,
+    t.eventTypeLabel,
+    t.animalLabel,
+    t.medicinePlaceholder,
+    t.dosePlaceholder,
+    t.statusLabel,
+    "OK",
+    "NOK",
+    t.eventNoteLabel,
+  ];
+  const rows = log.map((e) => [
+    toIsoDateOnly(e.date),
+    e.kind === "medication" ? t.tabMedication : t.tabIncubation,
+    e.animalName ?? e.incubatorName ?? "",
+    e.medicineName ?? e.species ?? "",
+    e.dose ?? (e.eggCount !== undefined ? String(e.eggCount) : ""),
+    e.status ? t.adminStatusLabels[e.status] : "",
+    e.hatchedOk !== undefined ? String(e.hatchedOk) : "",
+    e.hatchedNok !== undefined ? String(e.hatchedNok) : "",
+    e.note ?? "",
+  ]);
   return toCsv([header, ...rows]);
 };
 
