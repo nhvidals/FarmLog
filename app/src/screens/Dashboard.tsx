@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { Pressable, Text, View } from "react-native";
+import { Analytics } from "./Analytics";
 import { EmptyState, SectionHeader } from "../components";
 import { useApp } from "../context";
 import { buildCalendarEvents, statusOf } from "../helpers";
@@ -112,6 +113,10 @@ export function DashboardScreen({ userEmail, farmName }: { userEmail: string; fa
               </View>
             ))
           )}
+
+          <View style={{ marginTop: 8 }}>
+            <Analytics animals={animals} animalTypes={animalTypes} incubationList={incubationList} t={t} />
+          </View>
         </>
       )}
     </View>

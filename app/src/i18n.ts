@@ -251,6 +251,20 @@ export const translations = {
     dashStepType: "Criar um tipo de animal",
     dashStepAnimal: "Adicionar o primeiro animal",
 
+    // Analytics
+    analyticsTitle: "Estatisticas",
+    flockComposition: "Composicao do efetivo",
+    byStatus: "Por estado",
+    bySex: "Por sexo",
+    byType: "Por tipo",
+    incubationPerformance: "Desempenho de incubacao",
+    successRate: "Taxa de sucesso",
+    hatchedOf: "{ok}/{total} eclodidos",
+    batchesCompleted: "{done}/{total} lotes concluidos",
+    noResultsYet: "Sem resultados de incubacao registados.",
+    topBreeders: "Melhores reprodutores",
+    offspringCount: "{n} descendentes",
+
     // Medication recurrence
     freqLabel: "Frequencia",
     repeatEvery: "Repetir a cada",
@@ -579,6 +593,20 @@ export const translations = {
     dashGetStarted: "Get started",
     dashStepType: "Create an animal type",
     dashStepAnimal: "Add your first animal",
+
+    // Analytics
+    analyticsTitle: "Analytics",
+    flockComposition: "Flock composition",
+    byStatus: "By status",
+    bySex: "By sex",
+    byType: "By type",
+    incubationPerformance: "Incubation performance",
+    successRate: "Success rate",
+    hatchedOf: "{ok}/{total} hatched",
+    batchesCompleted: "{done}/{total} batches completed",
+    noResultsYet: "No incubation results recorded yet.",
+    topBreeders: "Top breeders",
+    offspringCount: "{n} offspring",
 
     // Medication recurrence
     freqLabel: "Frequency",
