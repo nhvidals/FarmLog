@@ -115,7 +115,7 @@ export function DashboardScreen({ userEmail, farmName }: { userEmail: string; fa
           )}
 
           <View style={{ marginTop: 8 }}>
-            <Analytics animals={animals} animalTypes={animalTypes} incubationList={incubationList} t={t} />
+            <Analytics animals={animals} animalTypes={animalTypes} incubationList={incubationList} medicationList={medicationList} t={t} />
           </View>
         </>
       )}

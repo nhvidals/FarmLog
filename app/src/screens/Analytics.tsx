@@ -4,7 +4,7 @@ import { statusOf } from "../helpers";
 import { fmt, T } from "../i18n";
 import { styles } from "../styles";
 import { C } from "../theme";
-import { Animal, AnimalType, IncubationBatch } from "../types";
+import { Animal, AnimalType, IncubationBatch, MedicationSchedule } from "../types";
 
 /** A labelled proportional bar (no chart library needed). */
 function StatBar({ label, count, max, color }: { label: string; count: number; max: number; color: string }) {
@@ -24,11 +24,13 @@ export function Analytics({
   animals,
   animalTypes,
   incubationList,
+  medicationList,
   t,
 }: {
   animals: Animal[];
   animalTypes: AnimalType[];
   incubationList: IncubationBatch[];
+  medicationList: MedicationSchedule[];
   t: T;
 }) {
   const stats = useMemo(() => {
@@ -68,8 +70,14 @@ export function Analytics({
       .sort((a, b) => b.n - a.n)
       .slice(0, 5);
 
-    return { status, sex, byType, ok, nok, completed, hatchTotal, rate, breeders };
-  }, [animals, incubationList]);
+    // Treatment history: totals and most-used medicines.
+    const medRecurring = medicationList.filter((m) => (m.frequency ?? "once") !== "once").length;
+    const medByName = new Map<string, number>();
+    for (const m of medicationList) medByName.set(m.medicineName, (medByName.get(m.medicineName) ?? 0) + 1);
+    const topMeds = [...medByName.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5);
+
+    return { status, sex, byType, ok, nok, completed, hatchTotal, rate, breeders, medRecurring, topMeds };
+  }, [animals, incubationList, medicationList]);
 
   if (animals.length === 0) return null;
 
@@ -119,6 +127,28 @@ export function Analytics({
             <Text style={styles.analyticsGroupLabel}>
               {fmt(t.batchesCompleted, { done: String(stats.completed), total: String(incubationList.length) })}
             </Text>
+          </>
+        )}
+      </View>
+
+      {/* Treatment history */}
+      <View style={styles.analyticsCard}>
+        <Text style={styles.analyticsCardTitle}>{t.treatmentsTitle}</Text>
+        {medicationList.length === 0 ? (
+          <Text style={styles.treeHint}>{t.noTreatmentsYet}</Text>
+        ) : (
+          <>
+            <Text style={styles.analyticsGroupLabel}>
+              {fmt(t.treatmentsSummary, { total: String(medicationList.length), recurring: String(stats.medRecurring) })}
+            </Text>
+            {stats.topMeds.length > 0 && (
+              <>
+                <Text style={styles.analyticsGroupLabel}>{t.topMedicines}</Text>
+                {stats.topMeds.map(([medName, n]) => (
+                  <StatBar key={medName} label={medName} count={n} max={Math.max(1, ...stats.topMeds.map(([, c]) => c))} color={C.danger} />
+                ))}
+              </>
+            )}
           </>
         )}
       </View>

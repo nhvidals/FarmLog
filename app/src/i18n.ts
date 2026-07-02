@@ -151,6 +151,13 @@ export const translations = {
 
     delete: "Eliminar",
     edit: "Editar",
+    editRecord: "Editar registo",
+    successUpdated: "Registo atualizado.",
+    successDeleted: "Registo eliminado.",
+    errUpdate: "Nao foi possivel atualizar o registo.",
+    errDelete: "Nao foi possivel eliminar o registo.",
+    confirmDeleteRecordTitle: "Eliminar registo",
+    confirmDeleteRecordMsg: "Eliminar este registo? Esta acao e irreversivel.",
     cancel: "Cancelar",
     saveChanges: "Guardar alteracoes",
     cancelEdit: "Cancelar edicao",
@@ -264,6 +271,10 @@ export const translations = {
     noResultsYet: "Sem resultados de incubacao registados.",
     topBreeders: "Melhores reprodutores",
     offspringCount: "{n} descendentes",
+    treatmentsTitle: "Tratamentos",
+    treatmentsSummary: "{total} registos · {recurring} recorrentes",
+    topMedicines: "Medicamentos mais usados",
+    noTreatmentsYet: "Sem tratamentos registados.",
 
     // Medication recurrence
     freqLabel: "Frequencia",
@@ -494,6 +505,13 @@ export const translations = {
 
     delete: "Delete",
     edit: "Edit",
+    editRecord: "Edit record",
+    successUpdated: "Record updated.",
+    successDeleted: "Record deleted.",
+    errUpdate: "Could not update the record.",
+    errDelete: "Could not delete the record.",
+    confirmDeleteRecordTitle: "Delete record",
+    confirmDeleteRecordMsg: "Delete this record? This cannot be undone.",
     cancel: "Cancel",
     saveChanges: "Save changes",
     cancelEdit: "Cancel edit",
@@ -607,6 +625,10 @@ export const translations = {
     noResultsYet: "No incubation results recorded yet.",
     topBreeders: "Top breeders",
     offspringCount: "{n} offspring",
+    treatmentsTitle: "Treatments",
+    treatmentsSummary: "{total} records · {recurring} recurring",
+    topMedicines: "Most-used medicines",
+    noTreatmentsYet: "No treatments recorded yet.",
 
     // Medication recurrence
     freqLabel: "Frequency",

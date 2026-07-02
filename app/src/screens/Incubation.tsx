@@ -10,13 +10,14 @@ import { C } from "../theme";
 import { IncubationBatch } from "../types";
 
 export function IncubationScreen() {
-  const { t, api, farmId, token, showToast, setTab, setAnimalSubTab, canWrite } = useApp();
+  const { t, api, farmId, token, showToast, confirm, setTab, setAnimalSubTab, canWrite } = useApp();
   const invalidate = useInvalidateFarmData(farmId);
 
   const { data: incubationList = [] } = useIncubation(api, farmId, token);
   const { data: animalTypes = [] } = useAnimalTypes(api, farmId, token);
 
   const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [species, setSpecies] = useState("");
   const [eggCount, setEggCount] = useState("12");
   const [incubatorName, setIncubatorName] = useState("Incubadora A");
@@ -26,28 +27,71 @@ export function IncubationScreen() {
   const [resultOk, setResultOk] = useState("");
   const [resultNok, setResultNok] = useState("");
 
-  const create = async () => {
+  const resetForm = () => {
+    setEditingId(null);
+    setSpecies("");
+    setEggCount("12");
+    setIncubatorName("Incubadora A");
+    setStartDate("2026-06-23");
+    setExpectedDate("2026-07-14");
+  };
+
+  const startEdit = (batch: IncubationBatch) => {
+    setEditingId(batch._id);
+    setSpecies(batch.species);
+    setEggCount(String(batch.eggCount));
+    setIncubatorName(batch.incubatorName);
+    setStartDate(toIsoDateOnly(batch.startDate));
+    setExpectedDate(toIsoDateOnly(batch.expectedHatchDate));
+    setResultBatchId(null);
+    setShowForm(true);
+  };
+
+  const save = async () => {
     if (!farmId) { showToast("warning", t.valSelectFarm); return; }
     if (!isDate(startDate) || !isDate(expectedDate)) { showToast("warning", t.valDates); return; }
     if (!species.trim() || !incubatorName.trim() || Number(eggCount) < 1 || Number.isNaN(Number(eggCount))) {
       showToast("warning", t.valIncubationFields);
       return;
     }
+    const payload = {
+      species,
+      eggCount: Number(eggCount),
+      incubatorName: incubatorName.trim(),
+      startDate,
+      expectedHatchDate: expectedDate,
+    };
     try {
       // Notifications are (re)scheduled centrally by ReminderScheduler.
-      await api.post("/incubation", {
-        species,
-        eggCount: Number(eggCount),
-        incubatorName: incubatorName.trim(),
-        startDate,
-        expectedHatchDate: expectedDate,
-      });
+      if (editingId) {
+        await api.put(`/incubation/${editingId}`, payload);
+      } else {
+        await api.post("/incubation", payload);
+      }
+      resetForm();
       setShowForm(false);
       invalidate();
-      showToast("success", t.successIncubationCreated);
+      showToast("success", editingId ? t.successUpdated : t.successIncubationCreated);
     } catch {
-      showToast("error", t.errCreateIncubation);
+      showToast("error", editingId ? t.errUpdate : t.errCreateIncubation);
     }
+  };
+
+  const remove = (id: string) => {
+    confirm({
+      title: t.confirmDeleteRecordTitle,
+      message: t.confirmDeleteRecordMsg,
+      confirmLabel: t.delete,
+      onConfirm: async () => {
+        try {
+          await api.delete(`/incubation/${id}`);
+          invalidate();
+          showToast("success", t.successDeleted);
+        } catch {
+          showToast("error", t.errDelete);
+        }
+      },
+    });
   };
 
   const openResultForm = (batch: IncubationBatch) => {
@@ -81,13 +125,13 @@ export function IncubationScreen() {
       <SectionHeader
         title={t.batches}
         count={incubationList.length}
-        onAdd={farmId && canWrite ? () => setShowForm(!showForm) : undefined}
+        onAdd={farmId && canWrite ? () => { if (showForm) { setShowForm(false); resetForm(); } else { resetForm(); setShowForm(true); } } : undefined}
         open={showForm}
       />
 
       {showForm && (
         <View style={styles.formCard}>
-          <Text style={styles.formCardTitle}>{t.registerIncubation}</Text>
+          <Text style={styles.formCardTitle}>{editingId ? t.editRecord : t.registerIncubation}</Text>
 
           <FieldLabel text={t.animalTypeLabel} />
           {animalTypes.length === 0 ? (
@@ -121,9 +165,14 @@ export function IncubationScreen() {
           <FieldLabel text={t.hatchDatePlaceholder} />
           <DatePickerField value={expectedDate} onChange={setExpectedDate} t={t} minValue={startDate} />
 
-          <Pressable style={styles.primaryBtn} onPress={create}>
-            <Text style={styles.primaryBtnText}>{t.saveIncubation}</Text>
+          <Pressable style={styles.primaryBtn} onPress={save}>
+            <Text style={styles.primaryBtnText}>{editingId ? t.saveChanges : t.saveIncubation}</Text>
           </Pressable>
+          {editingId && (
+            <Pressable style={styles.outlineBtn} onPress={() => { resetForm(); setShowForm(false); }}>
+              <Text style={styles.outlineBtnText}>{t.cancelEdit}</Text>
+            </Pressable>
+          )}
         </View>
       )}
 
@@ -176,13 +225,23 @@ export function IncubationScreen() {
                 </View>
               </View>
             ) : canWrite ? (
-              <View style={styles.cardActions}>
-                <Pressable style={styles.cardActionBtn} onPress={() => openResultForm(batch)}>
-                  <Text style={styles.cardActionBtnText}>
-                    {(batch.hatchedOk !== undefined || batch.hatchedNok !== undefined) ? `✏️ ${t.editResult}` : `🐣 ${t.registerResult}`}
-                  </Text>
-                </Pressable>
-              </View>
+              <>
+                <View style={styles.cardActions}>
+                  <Pressable style={styles.cardActionBtn} onPress={() => openResultForm(batch)}>
+                    <Text style={styles.cardActionBtnText}>
+                      {(batch.hatchedOk !== undefined || batch.hatchedNok !== undefined) ? `✏️ ${t.editResult}` : `🐣 ${t.registerResult}`}
+                    </Text>
+                  </Pressable>
+                </View>
+                <View style={{ flexDirection: "row", gap: 8, marginTop: 8 }}>
+                  <Pressable style={styles.cardActionBtn} onPress={() => startEdit(batch)}>
+                    <Text style={styles.cardActionBtnText}>✏️ {t.edit}</Text>
+                  </Pressable>
+                  <Pressable style={[styles.cardActionBtn, styles.cardActionBtnDanger]} onPress={() => remove(batch._id)}>
+                    <Text style={[styles.cardActionBtnText, styles.cardActionBtnTextDanger]}>🗑 {t.delete}</Text>
+                  </Pressable>
+                </View>
+              </>
             ) : null}
           </View>
         ))

@@ -11,13 +11,14 @@ import { C } from "../theme";
 import { MEDICATION_FREQUENCIES, MedicationFrequency, MedicationSchedule } from "../types";
 
 export function MedicationScreen() {
-  const { t, api, farmId, token, showToast, canWrite } = useApp();
+  const { t, api, farmId, token, showToast, confirm, canWrite } = useApp();
   const invalidate = useInvalidateFarmData(farmId);
 
   const { data: medicationList = [] } = useMedication(api, farmId, token);
   const { data: animals = [] } = useAnimals(api, farmId, token);
 
   const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [animalId, setAnimalId] = useState("");
   const [name, setName] = useState("");
   const [dose, setDose] = useState("");
@@ -26,34 +27,75 @@ export function MedicationScreen() {
   const [interval, setInterval] = useState("1");
   const [endDate, setEndDate] = useState("");
 
-  const create = async () => {
+  const resetForm = () => {
+    setEditingId(null);
+    setAnimalId("");
+    setName("");
+    setDose("");
+    setDate("2026-06-24");
+    setFrequency("once");
+    setInterval("1");
+    setEndDate("");
+  };
+
+  const startEdit = (entry: MedicationSchedule) => {
+    setEditingId(entry._id);
+    setAnimalId(typeof entry.animalId === "string" ? entry.animalId : entry.animalId._id);
+    setName(entry.medicineName);
+    setDose(entry.dose);
+    setDate(toIsoDateOnly(entry.date));
+    setFrequency(entry.frequency ?? "once");
+    setInterval(String(entry.interval ?? 1));
+    setEndDate(toIsoDateOnly(entry.endDate));
+    setShowForm(true);
+  };
+
+  const save = async () => {
     if (!farmId) { showToast("warning", t.valSelectFarm); return; }
     if (!animalId || !name.trim() || !dose.trim()) { showToast("warning", t.valMedicationFields); return; }
     if (!isDate(date)) { showToast("warning", t.valDate); return; }
     const recurring = frequency !== "once";
+    const payload = {
+      animalId,
+      medicineName: name.trim(),
+      dose: dose.trim(),
+      date,
+      frequency,
+      interval: recurring ? Math.max(1, Number(interval) || 1) : 1,
+      endDate: recurring && endDate ? endDate : undefined,
+    };
     try {
       // Notifications are (re)scheduled centrally by ReminderScheduler from the
       // stored schedules, so this only persists the record.
-      await api.post("/medication", {
-        animalId,
-        medicineName: name.trim(),
-        dose: dose.trim(),
-        date,
-        frequency,
-        interval: recurring ? Math.max(1, Number(interval) || 1) : 1,
-        endDate: recurring && endDate ? endDate : undefined,
-      });
-      setName("");
-      setDose("");
-      setFrequency("once");
-      setInterval("1");
-      setEndDate("");
+      if (editingId) {
+        await api.put(`/medication/${editingId}`, payload);
+      } else {
+        await api.post("/medication", payload);
+      }
+      resetForm();
       setShowForm(false);
       invalidate();
-      showToast("success", t.successMedicationCreated);
+      showToast("success", editingId ? t.successUpdated : t.successMedicationCreated);
     } catch {
-      showToast("error", t.errCreateMedication);
+      showToast("error", editingId ? t.errUpdate : t.errCreateMedication);
     }
+  };
+
+  const remove = (id: string) => {
+    confirm({
+      title: t.confirmDeleteRecordTitle,
+      message: t.confirmDeleteRecordMsg,
+      confirmLabel: t.delete,
+      onConfirm: async () => {
+        try {
+          await api.delete(`/medication/${id}`);
+          invalidate();
+          showToast("success", t.successDeleted);
+        } catch {
+          showToast("error", t.errDelete);
+        }
+      },
+    });
   };
 
   // Human-readable recurrence label for a schedule, or null when one-off.
@@ -69,13 +111,13 @@ export function MedicationScreen() {
       <SectionHeader
         title={t.records}
         count={medicationList.length}
-        onAdd={farmId && canWrite ? () => setShowForm(!showForm) : undefined}
+        onAdd={farmId && canWrite ? () => { if (showForm) { setShowForm(false); resetForm(); } else { resetForm(); setShowForm(true); } } : undefined}
         open={showForm}
       />
 
       {showForm && (
         <View style={styles.formCard}>
-          <Text style={styles.formCardTitle}>{t.medicationPlan}</Text>
+          <Text style={styles.formCardTitle}>{editingId ? t.editRecord : t.medicationPlan}</Text>
 
           <FieldLabel text={t.animalLabel} />
           <ScrollView horizontal contentContainerStyle={styles.chipRow} showsHorizontalScrollIndicator={false}>
@@ -138,9 +180,14 @@ export function MedicationScreen() {
             </>
           )}
 
-          <Pressable style={styles.primaryBtn} onPress={create}>
-            <Text style={styles.primaryBtnText}>{t.saveMedication}</Text>
+          <Pressable style={styles.primaryBtn} onPress={save}>
+            <Text style={styles.primaryBtnText}>{editingId ? t.saveChanges : t.saveMedication}</Text>
           </Pressable>
+          {editingId && (
+            <Pressable style={styles.outlineBtn} onPress={() => { resetForm(); setShowForm(false); }}>
+              <Text style={styles.outlineBtnText}>{t.cancelEdit}</Text>
+            </Pressable>
+          )}
         </View>
       )}
 
@@ -164,6 +211,16 @@ export function MedicationScreen() {
                 <Text style={styles.cardMetaText}>🔁 {recurrenceLabel(entry)}</Text>
               )}
             </View>
+            {canWrite && (
+              <View style={styles.cardActions}>
+                <Pressable style={styles.cardActionBtn} onPress={() => startEdit(entry)}>
+                  <Text style={styles.cardActionBtnText}>✏️ {t.edit}</Text>
+                </Pressable>
+                <Pressable style={[styles.cardActionBtn, styles.cardActionBtnDanger]} onPress={() => remove(entry._id)}>
+                  <Text style={[styles.cardActionBtnText, styles.cardActionBtnTextDanger]}>🗑 {t.delete}</Text>
+                </Pressable>
+              </View>
+            )}
           </View>
         ))
       )}
