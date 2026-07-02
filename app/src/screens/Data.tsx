@@ -1,24 +1,22 @@
-import { useQueryClient } from "@tanstack/react-query";
 import * as DocumentPicker from "expo-document-picker";
 import * as FileSystem from "expo-file-system/legacy";
 import { useState } from "react";
 import { Platform, Pressable, Text, View } from "react-native";
 import { EmptyState, SectionHeader } from "../components";
 import { useApp } from "../context";
-import { useConfirmDelete } from "../hooks";
+import { useUndoableDelete } from "../hooks";
 import { toIsoDateOnly } from "../helpers";
 import { qk, useAnimals, useIncubation, useInvalidateFarmData, useLog, useMedication } from "../queries";
 import { buildIncubationCsv, buildInventoryCsv, buildLogCsv, buildTreatmentCsv } from "../reports";
 import { shareTextFile } from "../share";
 import { styles } from "../styles";
 import { C } from "../theme";
-import { LOG_KINDS, LogKind } from "../types";
+import { LOG_KINDS, LogEntry, LogKind } from "../types";
 
 export function DataScreen() {
   const { t, api, farmId, token, showToast, canWrite } = useApp();
   const invalidate = useInvalidateFarmData(farmId);
-  const queryClient = useQueryClient();
-  const confirmDelete = useConfirmDelete();
+  const undoDelete = useUndoableDelete();
 
   const { data: animals = [] } = useAnimals(api, farmId, token);
   const { data: medication = [] } = useMedication(api, farmId, token);
@@ -28,11 +26,8 @@ export function DataScreen() {
   const [logFilter, setLogFilter] = useState<LogKind | "all">("all");
   const visibleLog = log.filter((e) => logFilter === "all" || e.kind === logFilter);
 
-  const deleteLogEntry = (id: string) =>
-    confirmDelete({
-      url: `/log/${id}`,
-      onDeleted: () => queryClient.invalidateQueries({ queryKey: qk.log(farmId) }),
-    });
+  const deleteLogEntry = (entry: LogEntry) =>
+    undoDelete({ queryKey: qk.log(farmId), item: entry, url: `/log/${entry._id}` });
 
   const exportData = async () => {
     if (!farmId) { showToast("warning", t.valSelectFarm); return; }
@@ -146,7 +141,7 @@ export function DataScreen() {
             </View>
             <Text style={styles.cardMetaText}>{toIsoDateOnly(e.date)}</Text>
             {canWrite && (
-              <Pressable onPress={() => deleteLogEntry(e._id)} hitSlop={6} style={{ paddingHorizontal: 6 }}>
+              <Pressable onPress={() => deleteLogEntry(e)} hitSlop={6} style={{ paddingHorizontal: 6 }} accessibilityLabel={t.delete}>
                 <Text style={{ fontSize: 14 }}>🗑</Text>
               </Pressable>
             )}

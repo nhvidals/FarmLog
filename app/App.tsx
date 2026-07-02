@@ -21,7 +21,9 @@ import {
   AppProvider,
   ConfirmOptions,
   TabKey,
+  ToastAction,
   ToastType,
+  UNDO_WINDOW_MS,
 } from "./src/context";
 import { fmt, Lang, T, translations } from "./src/i18n";
 import { LoginScreen } from "./src/LoginScreen";
@@ -105,7 +107,7 @@ function AppInner() {
   const [sortBy, setSortBy] = useState<AnimalSort>("newest");
   const [showFilters, setShowFilters] = useState(false);
 
-  const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: ToastType; action?: ToastAction } | null>(null);
   const [serverStatus, setServerStatus] = useState<"online" | "offline" | "checking">("checking");
   const [refreshing, setRefreshing] = useState(false);
   const [confirm, setConfirm] = useState<ConfirmOptions | null>(null);
@@ -113,10 +115,15 @@ function AppInner() {
   // Auto-dismiss timer, tracked so a new toast cancels the previous one's timeout
   // (otherwise the earlier timer could clear a newer toast before its 4s elapse).
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const showToast = useCallback((type: ToastType, message: string) => {
+  const showToast = useCallback((type: ToastType, message: string, action?: ToastAction) => {
     if (toastTimer.current) clearTimeout(toastTimer.current);
-    setToast({ type, message });
-    toastTimer.current = setTimeout(() => setToast(null), 4000);
+    setToast({ type, message, action });
+    // Actionable toasts (e.g. "Undo") stay up for the full undo window.
+    toastTimer.current = setTimeout(() => setToast(null), action ? UNDO_WINDOW_MS : 4000);
+  }, []);
+  const dismissToast = useCallback(() => {
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    setToast(null);
   }, []);
 
   // Drop the dead session and return to the login screen; also clears the query
@@ -371,7 +378,7 @@ function AppInner() {
               <Pressable style={[styles.langPill, lang === "en" && styles.langPillActive]} onPress={() => setLang("en")}>
                 <Text style={[styles.langPillText, lang === "en" && styles.langPillTextActive]}>EN</Text>
               </Pressable>
-              <Pressable style={[styles.iconBtn, showSettings && styles.iconBtnActive]} onPress={() => setShowSettings(!showSettings)}>
+              <Pressable style={[styles.iconBtn, showSettings && styles.iconBtnActive]} onPress={() => setShowSettings(!showSettings)} accessibilityLabel={t.a11ySettings}>
                 <Text style={styles.iconBtnText}>⚙</Text>
                 <View style={[
                   styles.serverDot,
@@ -380,7 +387,7 @@ function AppInner() {
                   serverStatus === "checking" && styles.serverDotChecking,
                 ]} />
               </Pressable>
-              <Pressable style={styles.iconBtn} onPress={handleLogout} accessibilityLabel={t.logout}>
+              <Pressable style={styles.iconBtn} onPress={handleLogout} accessibilityLabel={t.a11yLogout}>
                 <Text style={styles.iconBtnText}>⎋</Text>
               </Pressable>
             </View>
@@ -396,7 +403,7 @@ function AppInner() {
                       {farm.name}
                     </Text>
                   </Pressable>
-                  <Pressable testID={`farm-delete-${farm._id}`} onPress={() => deleteFarm(farm._id, farm.name)} style={styles.farmPillDelete}>
+                  <Pressable testID={`farm-delete-${farm._id}`} onPress={() => deleteFarm(farm._id, farm.name)} style={styles.farmPillDelete} accessibilityLabel={`${t.delete} ${farm.name}`}>
                     <Text style={[styles.farmPillDeleteText, selectedFarmId === farm._id && styles.farmPillDeleteTextActive]}>×</Text>
                   </Pressable>
                 </View>
@@ -470,9 +477,18 @@ function AppInner() {
         {toast && (
           <Pressable
             style={[styles.toast, toast.type === "error" && styles.toastError, toast.type === "success" && styles.toastSuccess, toast.type === "warning" && styles.toastWarning]}
-            onPress={() => setToast(null)}
+            onPress={dismissToast}
           >
             <Text style={styles.toastText}>{toast.message}</Text>
+            {toast.action && (
+              <Pressable
+                style={styles.toastAction}
+                onPress={() => { toast.action?.onPress(); dismissToast(); }}
+                accessibilityLabel={toast.action.label}
+              >
+                <Text style={styles.toastActionText}>{toast.action.label}</Text>
+              </Pressable>
+            )}
             <Text style={styles.toastDismiss}>✕</Text>
           </Pressable>
         )}

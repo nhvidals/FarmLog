@@ -79,7 +79,7 @@ export function MembersModal({ visible, onClose }: { visible: boolean; onClose: 
         <Pressable style={[styles.modalCard, { maxHeight: "85%" }]} onPress={() => {}}>
           <View style={styles.membersHeader}>
             <Text style={styles.modalTitle}>{t.membersTitle}</Text>
-            <Pressable onPress={onClose} hitSlop={8}>
+            <Pressable onPress={onClose} hitSlop={8} accessibilityLabel={t.a11yClose}>
               <Text style={styles.membersClose}>✕</Text>
             </Pressable>
           </View>
@@ -113,7 +113,7 @@ export function MembersModal({ visible, onClose }: { visible: boolean; onClose: 
                           </Text>
                         </Pressable>
                       ))}
-                      <Pressable style={styles.memberRemoveBtn} onPress={() => removeMember(member)}>
+                      <Pressable style={styles.memberRemoveBtn} onPress={() => removeMember(member)} accessibilityLabel={`${t.delete} ${member.email}`}>
                         <Text style={styles.memberRemoveText}>🗑</Text>
                       </Pressable>
                     </View>

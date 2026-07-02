@@ -1,4 +1,5 @@
-import { useApp } from "./context";
+import { useQueryClient } from "@tanstack/react-query";
+import { UNDO_WINDOW_MS, useApp } from "./context";
 
 interface ConfirmDeleteOptions {
   /** Endpoint to DELETE (already farm-scoped via the shared api client). */
@@ -33,6 +34,60 @@ export function useConfirmDelete() {
         } catch {
           showToast("error", opts.errorMsg ?? t.errDelete);
         }
+      },
+    });
+  };
+}
+
+interface UndoableDeleteOptions<T> {
+  /** react-query key of the list the item lives in (must hold an array of T). */
+  queryKey: readonly unknown[];
+  /** The item being removed; matched by `_id` for optimistic removal + restore. */
+  item: T;
+  /** Endpoint to DELETE once the undo window elapses. */
+  url: string;
+  /** Runs after the delete is actually committed on the server (e.g. invalidate). */
+  onCommitted?: () => void;
+  successMsg?: string;
+  errorMsg?: string;
+}
+
+/**
+ * Returns a function that deletes a list item with an "Undo" grace period:
+ * removes it from the cached list immediately, shows an Undo toast, and only
+ * commits the server DELETE after UNDO_WINDOW_MS. Pressing Undo restores the
+ * cached list and cancels the pending delete. The farm-scoped `api` and the
+ * previous list are captured in the closure, so a farm switch during the window
+ * still targets the right farm and restores the right cache.
+ */
+export function useUndoableDelete() {
+  const { t, api, showToast } = useApp();
+  const queryClient = useQueryClient();
+  return <T extends { _id: string }>(opts: UndoableDeleteOptions<T>) => {
+    const { queryKey, item, url } = opts;
+    const previous = queryClient.getQueryData<T[]>(queryKey);
+    queryClient.setQueryData<T[]>(queryKey, (list) =>
+      (list ?? []).filter((it) => it._id !== item._id)
+    );
+
+    let undone = false;
+    const timer = setTimeout(async () => {
+      if (undone) return;
+      try {
+        await api.delete(url);
+        opts.onCommitted?.();
+      } catch {
+        queryClient.setQueryData<T[]>(queryKey, previous);
+        showToast("error", opts.errorMsg ?? t.errDelete);
+      }
+    }, UNDO_WINDOW_MS);
+
+    showToast("success", opts.successMsg ?? t.successDeleted, {
+      label: t.undo,
+      onPress: () => {
+        undone = true;
+        clearTimeout(timer);
+        queryClient.setQueryData<T[]>(queryKey, previous);
       },
     });
   };

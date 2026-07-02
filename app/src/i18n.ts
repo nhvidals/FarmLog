@@ -144,6 +144,18 @@ export const translations = {
     valMedicationFields: "Animal, medicamento e dose sao obrigatorios.",
     valDate: "Data invalida. Use YYYY-MM-DD.",
 
+    undo: "Anular",
+    fieldRequired: "Obrigatorio",
+    fieldInvalidDate: "Data invalida",
+    fieldInvalidNumber: "Numero invalido",
+    fieldSelectRequired: "Selecione uma opcao",
+
+    a11ySettings: "Definicoes",
+    a11yClose: "Fechar",
+    a11yClearSearch: "Limpar pesquisa",
+    a11yFilters: "Filtros",
+    a11yLogout: "Terminar sessao",
+
     notifIncubationTitle: "Incubacao",
     notifMedicationTitle: "Medicacao",
     notifIncubationBody: "Hoje e o dia esperado de eclosao ({name}).",
@@ -511,6 +523,18 @@ export const translations = {
     valIncubationFields: "Species, incubator and a valid egg count are required.",
     valMedicationFields: "Animal, medicine and dose are required.",
     valDate: "Invalid date. Use YYYY-MM-DD.",
+
+    undo: "Undo",
+    fieldRequired: "Required",
+    fieldInvalidDate: "Invalid date",
+    fieldInvalidNumber: "Invalid number",
+    fieldSelectRequired: "Select an option",
+
+    a11ySettings: "Settings",
+    a11yClose: "Close",
+    a11yClearSearch: "Clear search",
+    a11yFilters: "Filters",
+    a11yLogout: "Log out",
 
     notifIncubationTitle: "Incubation",
     notifMedicationTitle: "Medication",

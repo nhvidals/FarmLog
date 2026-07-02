@@ -58,7 +58,7 @@ export function LogDoseModal({ schedule, onClose }: { schedule: MedicationSchedu
             <Text style={styles.modalTitle} numberOfLines={1}>
               {t.logDoseTitle}{schedule ? ` · ${schedule.medicineName}` : ""}
             </Text>
-            <Pressable onPress={onClose} hitSlop={8}>
+            <Pressable onPress={onClose} hitSlop={8} accessibilityLabel={t.a11yClose}>
               <Text style={styles.membersClose}>✕</Text>
             </Pressable>
           </View>

@@ -89,7 +89,7 @@ export function AnimalHistoryModal({ animal, onClose }: { animal: Animal | null;
             <Text style={styles.modalTitle} numberOfLines={1}>
               {animal ? fmt(t.historyTitle, { name: animal.name }) : ""}
             </Text>
-            <Pressable onPress={onClose} hitSlop={8}>
+            <Pressable onPress={onClose} hitSlop={8} accessibilityLabel={t.a11yClose}>
               <Text style={styles.membersClose}>✕</Text>
             </Pressable>
           </View>
@@ -171,7 +171,7 @@ export function AnimalHistoryModal({ animal, onClose }: { animal: Animal | null;
                   </View>
                   <Text style={styles.eventRowDate}>{toIsoDateOnly(ev.date)}</Text>
                   {canWrite && (
-                    <Pressable onPress={() => remove(ev)} hitSlop={6} style={styles.eventRemoveBtn}>
+                    <Pressable onPress={() => remove(ev)} hitSlop={6} style={styles.eventRemoveBtn} accessibilityLabel={t.delete}>
                       <Text style={styles.eventRemoveText}>🗑</Text>
                     </Pressable>
                   )}
