@@ -4,11 +4,14 @@ import { Badge, EmptyState, FieldLabel, SectionHeader } from "../components";
 import { useApp } from "../context";
 import { DatePickerField } from "../datepicker";
 import { useConfirmDelete } from "../hooks";
-import { isDate, toIsoDateOnly } from "../helpers";
+import { addDaysIso, daysBetweenIso, isDate, todayIso, toIsoDateOnly } from "../helpers";
 import { useAnimalTypes, useIncubation, useInvalidateFarmData } from "../queries";
 import { styles } from "../styles";
 import { C } from "../theme";
 import { IncubationBatch } from "../types";
+
+// Typical avian incubation (chicken); a sensible default the user can adjust.
+const INCUBATION_DEFAULT_DAYS = 21;
 
 export function IncubationScreen() {
   const { t, api, farmId, token, showToast, setTab, setAnimalSubTab, canWrite } = useApp();
@@ -21,10 +24,10 @@ export function IncubationScreen() {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [species, setSpecies] = useState("");
-  const [eggCount, setEggCount] = useState("12");
-  const [incubatorName, setIncubatorName] = useState("Incubadora A");
-  const [startDate, setStartDate] = useState("2026-06-23");
-  const [expectedDate, setExpectedDate] = useState("2026-07-14");
+  const [eggCount, setEggCount] = useState("");
+  const [incubatorName, setIncubatorName] = useState("");
+  const [startDate, setStartDate] = useState(todayIso);
+  const [expectedDate, setExpectedDate] = useState(() => addDaysIso(todayIso(), INCUBATION_DEFAULT_DAYS));
   const [resultBatchId, setResultBatchId] = useState<string | null>(null);
   const [resultOk, setResultOk] = useState("");
   const [resultNok, setResultNok] = useState("");
@@ -32,10 +35,18 @@ export function IncubationScreen() {
   const resetForm = () => {
     setEditingId(null);
     setSpecies("");
-    setEggCount("12");
-    setIncubatorName("Incubadora A");
-    setStartDate("2026-06-23");
-    setExpectedDate("2026-07-14");
+    setEggCount("");
+    setIncubatorName("");
+    setStartDate(todayIso());
+    setExpectedDate(addDaysIso(todayIso(), INCUBATION_DEFAULT_DAYS));
+  };
+
+  // Moving the start date shifts the hatch date by the same amount, preserving
+  // the incubation duration the user has set instead of silently overwriting it.
+  const onStartChange = (next: string) => {
+    const gap = daysBetweenIso(startDate, expectedDate);
+    setStartDate(next);
+    if (gap !== null && gap >= 0) setExpectedDate(addDaysIso(next, gap));
   };
 
   const startEdit = (batch: IncubationBatch) => {
@@ -148,7 +159,7 @@ export function IncubationScreen() {
             placeholder={t.incubatorPlaceholder} placeholderTextColor={C.textMuted} />
 
           <FieldLabel text={t.startDatePlaceholder} />
-          <DatePickerField value={startDate} onChange={setStartDate} t={t} />
+          <DatePickerField value={startDate} onChange={onStartChange} t={t} />
 
           <FieldLabel text={t.hatchDatePlaceholder} />
           <DatePickerField value={expectedDate} onChange={setExpectedDate} t={t} minValue={startDate} />

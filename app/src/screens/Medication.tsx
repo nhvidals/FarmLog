@@ -5,7 +5,7 @@ import { useApp } from "../context";
 import { DatePickerField } from "../datepicker";
 import { useConfirmDelete } from "../hooks";
 import { fmt } from "../i18n";
-import { isDate, toIsoDateOnly } from "../helpers";
+import { isDate, todayIso, toIsoDateOnly } from "../helpers";
 import { useAnimals, useInvalidateFarmData, useLog, useMedication } from "../queries";
 import { LogDoseModal } from "./LogDose";
 import { styles } from "../styles";
@@ -27,7 +27,7 @@ export function MedicationScreen() {
   const [animalId, setAnimalId] = useState("");
   const [name, setName] = useState("");
   const [dose, setDose] = useState("");
-  const [date, setDate] = useState("2026-06-24");
+  const [date, setDate] = useState(todayIso());
   const [frequency, setFrequency] = useState<MedicationFrequency>("once");
   const [interval, setInterval] = useState("1");
   const [endDate, setEndDate] = useState("");
@@ -37,7 +37,7 @@ export function MedicationScreen() {
     setAnimalId("");
     setName("");
     setDose("");
-    setDate("2026-06-24");
+    setDate(todayIso());
     setFrequency("once");
     setInterval("1");
     setEndDate("");

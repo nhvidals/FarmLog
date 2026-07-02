@@ -25,6 +25,23 @@ const parseLocalDate = (value: unknown): Date | null => {
   return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
 };
 
+/** Today as a local YYYY-MM-DD string — the sensible default for new records. */
+export const todayIso = (): string => isoOf(new Date());
+
+/** Adds `n` days to a YYYY-MM-DD string, returning YYYY-MM-DD (input unchanged if unparseable). */
+export const addDaysIso = (iso: string, n: number): string => {
+  const d = parseLocalDate(iso);
+  return d ? isoOf(addDays(d, n)) : iso;
+};
+
+/** Whole days from `a` to `b` (both YYYY-MM-DD), or null when either is unparseable. */
+export const daysBetweenIso = (a: string, b: string): number | null => {
+  const da = parseLocalDate(a);
+  const db = parseLocalDate(b);
+  if (!da || !db) return null;
+  return Math.round((db.getTime() - da.getTime()) / 86_400_000);
+};
+
 /** Normalizes any date-ish value to a YYYY-MM-DD string (empty when absent). */
 export const toIsoDateOnly = (value: unknown): string => {
   if (typeof value !== "string" || !value) return "";

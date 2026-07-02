@@ -4,15 +4,11 @@ import { Modal, Pressable, Text, TextInput, View } from "react-native";
 import { FieldLabel } from "../components";
 import { useApp } from "../context";
 import { DatePickerField } from "../datepicker";
+import { todayIso } from "../helpers";
 import { qk } from "../queries";
 import { styles } from "../styles";
 import { C } from "../theme";
 import { ADMIN_STATUSES, AdminStatus, MedicationSchedule } from "../types";
-
-const todayIso = () => {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-};
 
 /** Records a dose of a medication schedule as given/skipped into the append-only log. */
 export function LogDoseModal({ schedule, onClose }: { schedule: MedicationSchedule | null; onClose: () => void }) {
