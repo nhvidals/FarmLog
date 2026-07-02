@@ -4,6 +4,7 @@ import { ActivityIndicator, Modal, Pressable, ScrollView, Text, TextInput, View 
 import { FieldLabel } from "../components";
 import { useApp } from "../context";
 import { DatePickerField } from "../datepicker";
+import { useConfirmDelete } from "../hooks";
 import { toIsoDateOnly } from "../helpers";
 import { fmt } from "../i18n";
 import { qk, useAnimalEvents } from "../queries";
@@ -24,8 +25,9 @@ const todayIso = () => {
 };
 
 export function AnimalHistoryModal({ animal, onClose }: { animal: Animal | null; onClose: () => void }) {
-  const { t, api, farmId, showToast, confirm, canWrite } = useApp();
+  const { t, api, farmId, showToast, canWrite } = useApp();
   const queryClient = useQueryClient();
+  const confirmDelete = useConfirmDelete();
   const animalId = animal?._id ?? "";
 
   const eventsQuery = useAnimalEvents(api, farmId, animalId, !!animal);
@@ -67,22 +69,15 @@ export function AnimalHistoryModal({ animal, onClose }: { animal: Animal | null;
     }
   };
 
-  const remove = (ev: HealthEvent) => {
-    confirm({
+  const remove = (ev: HealthEvent) =>
+    confirmDelete({
+      url: `/animals/${animalId}/events/${ev._id}`,
+      onDeleted: refresh,
       title: t.confirmRemoveEventTitle,
       message: t.confirmRemoveEventMsg,
-      confirmLabel: t.delete,
-      onConfirm: async () => {
-        try {
-          await api.delete(`/animals/${animalId}/events/${ev._id}`);
-          refresh();
-          showToast("success", t.successEventRemoved);
-        } catch {
-          showToast("error", t.errRemoveEvent);
-        }
-      },
+      successMsg: t.successEventRemoved,
+      errorMsg: t.errRemoveEvent,
     });
-  };
 
   const describe = (ev: HealthEvent): string => {
     if (ev.type === "weight" && ev.value !== undefined) {

@@ -116,7 +116,9 @@ export function useGenealogyTree(api: ApiClient, farmId: string, ring: string) {
 /**
  * Returns a helper that invalidates all farm-scoped resource caches for the
  * active farm — call after any create/update/delete so the affected lists
- * refetch. `tree` is intentionally left for its own screen to manage.
+ * refetch. The activity log is included because some mutations (e.g. deleting a
+ * completed incubation batch) archive an entry to it server-side. Per-animal
+ * `events` are left for the history screen to manage on its own.
  */
 export function useInvalidateFarmData(farmId: string) {
   const client = useQueryClient();
@@ -125,6 +127,7 @@ export function useInvalidateFarmData(farmId: string) {
     client.invalidateQueries({ queryKey: qk.animalTypes(farmId) });
     client.invalidateQueries({ queryKey: qk.incubation(farmId) });
     client.invalidateQueries({ queryKey: qk.medication(farmId) });
+    client.invalidateQueries({ queryKey: qk.log(farmId) });
     client.invalidateQueries({ queryKey: ["tree", farmId] });
   };
 }

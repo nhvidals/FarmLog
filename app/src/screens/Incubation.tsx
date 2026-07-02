@@ -3,6 +3,7 @@ import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { Badge, EmptyState, FieldLabel, SectionHeader } from "../components";
 import { useApp } from "../context";
 import { DatePickerField } from "../datepicker";
+import { useConfirmDelete } from "../hooks";
 import { isDate, toIsoDateOnly } from "../helpers";
 import { useAnimalTypes, useIncubation, useInvalidateFarmData } from "../queries";
 import { styles } from "../styles";
@@ -10,8 +11,9 @@ import { C } from "../theme";
 import { IncubationBatch } from "../types";
 
 export function IncubationScreen() {
-  const { t, api, farmId, token, showToast, confirm, setTab, setAnimalSubTab, canWrite } = useApp();
+  const { t, api, farmId, token, showToast, setTab, setAnimalSubTab, canWrite } = useApp();
   const invalidate = useInvalidateFarmData(farmId);
+  const confirmDelete = useConfirmDelete();
 
   const { data: incubationList = [] } = useIncubation(api, farmId, token);
   const { data: animalTypes = [] } = useAnimalTypes(api, farmId, token);
@@ -77,22 +79,8 @@ export function IncubationScreen() {
     }
   };
 
-  const remove = (id: string) => {
-    confirm({
-      title: t.confirmDeleteRecordTitle,
-      message: t.confirmDeleteRecordMsg,
-      confirmLabel: t.delete,
-      onConfirm: async () => {
-        try {
-          await api.delete(`/incubation/${id}`);
-          invalidate();
-          showToast("success", t.successDeleted);
-        } catch {
-          showToast("error", t.errDelete);
-        }
-      },
-    });
-  };
+  const remove = (id: string) =>
+    confirmDelete({ url: `/incubation/${id}`, onDeleted: invalidate });
 
   const openResultForm = (batch: IncubationBatch) => {
     setResultBatchId(batch._id);

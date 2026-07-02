@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Platform, Pressable, Text, View } from "react-native";
 import { EmptyState, SectionHeader } from "../components";
 import { useApp } from "../context";
+import { useConfirmDelete } from "../hooks";
 import { toIsoDateOnly } from "../helpers";
 import { qk, useAnimals, useIncubation, useInvalidateFarmData, useLog, useMedication } from "../queries";
 import { buildIncubationCsv, buildInventoryCsv, buildLogCsv, buildTreatmentCsv } from "../reports";
@@ -14,9 +15,10 @@ import { C } from "../theme";
 import { LOG_KINDS, LogKind } from "../types";
 
 export function DataScreen() {
-  const { t, api, farmId, token, showToast, confirm, canWrite } = useApp();
+  const { t, api, farmId, token, showToast, canWrite } = useApp();
   const invalidate = useInvalidateFarmData(farmId);
   const queryClient = useQueryClient();
+  const confirmDelete = useConfirmDelete();
 
   const { data: animals = [] } = useAnimals(api, farmId, token);
   const { data: medication = [] } = useMedication(api, farmId, token);
@@ -26,22 +28,11 @@ export function DataScreen() {
   const [logFilter, setLogFilter] = useState<LogKind | "all">("all");
   const visibleLog = log.filter((e) => logFilter === "all" || e.kind === logFilter);
 
-  const deleteLogEntry = (id: string) => {
-    confirm({
-      title: t.confirmDeleteRecordTitle,
-      message: t.confirmDeleteRecordMsg,
-      confirmLabel: t.delete,
-      onConfirm: async () => {
-        try {
-          await api.delete(`/log/${id}`);
-          queryClient.invalidateQueries({ queryKey: qk.log(farmId) });
-          showToast("success", t.successDeleted);
-        } catch {
-          showToast("error", t.errDelete);
-        }
-      },
+  const deleteLogEntry = (id: string) =>
+    confirmDelete({
+      url: `/log/${id}`,
+      onDeleted: () => queryClient.invalidateQueries({ queryKey: qk.log(farmId) }),
     });
-  };
 
   const exportData = async () => {
     if (!farmId) { showToast("warning", t.valSelectFarm); return; }

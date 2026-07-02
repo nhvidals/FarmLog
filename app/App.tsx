@@ -1,7 +1,7 @@
 import { QueryClientProvider, useQueryClient } from "@tanstack/react-query";
 import * as Notifications from "expo-notifications";
 import { StatusBar } from "expo-status-bar";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Modal,
@@ -110,9 +110,13 @@ function AppInner() {
   const [refreshing, setRefreshing] = useState(false);
   const [confirm, setConfirm] = useState<ConfirmOptions | null>(null);
 
+  // Auto-dismiss timer, tracked so a new toast cancels the previous one's timeout
+  // (otherwise the earlier timer could clear a newer toast before its 4s elapse).
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const showToast = useCallback((type: ToastType, message: string) => {
+    if (toastTimer.current) clearTimeout(toastTimer.current);
     setToast({ type, message });
-    setTimeout(() => setToast(null), 4000);
+    toastTimer.current = setTimeout(() => setToast(null), 4000);
   }, []);
 
   // Drop the dead session and return to the login screen; also clears the query

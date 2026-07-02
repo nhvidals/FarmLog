@@ -3,6 +3,7 @@ import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { Badge, EmptyState, FieldLabel, SectionHeader } from "../components";
 import { useApp } from "../context";
 import { DatePickerField } from "../datepicker";
+import { useConfirmDelete } from "../hooks";
 import { fmt } from "../i18n";
 import { isDate, toIsoDateOnly } from "../helpers";
 import { useAnimals, useInvalidateFarmData, useLog, useMedication } from "../queries";
@@ -12,8 +13,9 @@ import { C } from "../theme";
 import { MEDICATION_FREQUENCIES, MedicationFrequency, MedicationSchedule } from "../types";
 
 export function MedicationScreen() {
-  const { t, api, farmId, token, showToast, confirm, canWrite } = useApp();
+  const { t, api, farmId, token, showToast, canWrite } = useApp();
   const invalidate = useInvalidateFarmData(farmId);
+  const confirmDelete = useConfirmDelete();
 
   const { data: medicationList = [] } = useMedication(api, farmId, token);
   const { data: animals = [] } = useAnimals(api, farmId, token);
@@ -84,22 +86,8 @@ export function MedicationScreen() {
     }
   };
 
-  const remove = (id: string) => {
-    confirm({
-      title: t.confirmDeleteRecordTitle,
-      message: t.confirmDeleteRecordMsg,
-      confirmLabel: t.delete,
-      onConfirm: async () => {
-        try {
-          await api.delete(`/medication/${id}`);
-          invalidate();
-          showToast("success", t.successDeleted);
-        } catch {
-          showToast("error", t.errDelete);
-        }
-      },
-    });
-  };
+  const remove = (id: string) =>
+    confirmDelete({ url: `/medication/${id}`, onDeleted: invalidate });
 
   // How many administrations have been logged for a schedule.
   const loggedCount = (id: string) =>
