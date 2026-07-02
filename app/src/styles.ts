@@ -300,6 +300,21 @@ export const styles = StyleSheet.create({
     color: C.textMuted,
     fontWeight: "700",
   },
+  toastAction: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: C.primary,
+    backgroundColor: C.surface,
+  },
+  toastActionText: {
+    fontSize: 13,
+    fontWeight: "800",
+    color: C.primary,
+    textTransform: "uppercase",
+    letterSpacing: 0.4,
+  },
 
   // ── Scroll content ──
   scroll: {
@@ -343,6 +358,9 @@ export const styles = StyleSheet.create({
     marginBottom: 4,
     fontSize: 14,
     color: C.text,
+  },
+  inputError: {
+    borderColor: C.danger,
   },
 
   // Segment control

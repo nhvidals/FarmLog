@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
-import { Badge, EmptyState, FieldLabel, SectionHeader } from "../components";
+import { Badge, EmptyState, FieldError, FieldLabel, SectionHeader } from "../components";
 import { useApp } from "../context";
 import { DatePickerField } from "../datepicker";
-import { useConfirmDelete } from "../hooks";
+import { useUndoableDelete } from "../hooks";
 import { fmt } from "../i18n";
 import { isDate, todayIso, toIsoDateOnly } from "../helpers";
-import { useAnimals, useInvalidateFarmData, useLog, useMedication } from "../queries";
+import { qk, useAnimals, useInvalidateFarmData, useLog, useMedication } from "../queries";
 import { LogDoseModal } from "./LogDose";
 import { styles } from "../styles";
 import { C } from "../theme";
@@ -15,7 +15,7 @@ import { MEDICATION_FREQUENCIES, MedicationFrequency, MedicationSchedule } from 
 export function MedicationScreen() {
   const { t, api, farmId, token, showToast, canWrite } = useApp();
   const invalidate = useInvalidateFarmData(farmId);
-  const confirmDelete = useConfirmDelete();
+  const undoDelete = useUndoableDelete();
 
   const { data: medicationList = [] } = useMedication(api, farmId, token);
   const { data: animals = [] } = useAnimals(api, farmId, token);
@@ -32,6 +32,10 @@ export function MedicationScreen() {
   const [interval, setInterval] = useState("1");
   const [endDate, setEndDate] = useState("");
 
+  type FieldErrors = { animalId?: string; name?: string; dose?: string; date?: string };
+  const [errors, setErrors] = useState<FieldErrors>({});
+  const clearErr = (k: keyof FieldErrors) => setErrors((e) => (e[k] ? { ...e, [k]: undefined } : e));
+
   const resetForm = () => {
     setEditingId(null);
     setAnimalId("");
@@ -41,6 +45,7 @@ export function MedicationScreen() {
     setFrequency("once");
     setInterval("1");
     setEndDate("");
+    setErrors({});
   };
 
   const startEdit = (entry: MedicationSchedule) => {
@@ -52,13 +57,19 @@ export function MedicationScreen() {
     setFrequency(entry.frequency ?? "once");
     setInterval(String(entry.interval ?? 1));
     setEndDate(toIsoDateOnly(entry.endDate));
+    setErrors({});
     setShowForm(true);
   };
 
   const save = async () => {
     if (!farmId) { showToast("warning", t.valSelectFarm); return; }
-    if (!animalId || !name.trim() || !dose.trim()) { showToast("warning", t.valMedicationFields); return; }
-    if (!isDate(date)) { showToast("warning", t.valDate); return; }
+    const next: FieldErrors = {};
+    if (!animalId) next.animalId = t.fieldSelectRequired;
+    if (!name.trim()) next.name = t.fieldRequired;
+    if (!dose.trim()) next.dose = t.fieldRequired;
+    if (!isDate(date)) next.date = t.fieldInvalidDate;
+    setErrors(next);
+    if (Object.keys(next).length > 0) return;
     const recurring = frequency !== "once";
     const payload = {
       animalId,
@@ -86,8 +97,13 @@ export function MedicationScreen() {
     }
   };
 
-  const remove = (id: string) =>
-    confirmDelete({ url: `/medication/${id}`, onDeleted: invalidate });
+  const remove = (entry: MedicationSchedule) =>
+    undoDelete({
+      queryKey: qk.medication(farmId),
+      item: entry,
+      url: `/medication/${entry._id}`,
+      onCommitted: invalidate,
+    });
 
   // How many administrations have been logged for a schedule.
   const loggedCount = (id: string) =>
@@ -120,7 +136,7 @@ export function MedicationScreen() {
               <Pressable
                 key={animal._id}
                 style={[styles.chip, animalId === animal._id && styles.chipActive]}
-                onPress={() => setAnimalId(animal._id)}
+                onPress={() => { setAnimalId(animal._id); clearErr("animalId"); }}
               >
                 <Text style={[styles.chipText, animalId === animal._id && styles.chipTextActive]}>
                   {animal.name}
@@ -128,17 +144,23 @@ export function MedicationScreen() {
               </Pressable>
             ))}
           </ScrollView>
+          <FieldError text={errors.animalId} />
 
           <FieldLabel text={t.medicinePlaceholder} />
-          <TextInput style={styles.input} value={name} onChangeText={setName}
+          <TextInput style={[styles.input, errors.name && styles.inputError]} value={name}
+            onChangeText={(v) => { setName(v); clearErr("name"); }}
             placeholder={t.medicinePlaceholder} placeholderTextColor={C.textMuted} />
+          <FieldError text={errors.name} />
 
           <FieldLabel text={t.dosePlaceholder} />
-          <TextInput style={styles.input} value={dose} onChangeText={setDose}
+          <TextInput style={[styles.input, errors.dose && styles.inputError]} value={dose}
+            onChangeText={(v) => { setDose(v); clearErr("dose"); }}
             placeholder={t.dosePlaceholder} placeholderTextColor={C.textMuted} />
+          <FieldError text={errors.dose} />
 
           <FieldLabel text={t.datePlaceholder} />
-          <DatePickerField value={date} onChange={setDate} t={t} />
+          <DatePickerField value={date} onChange={(v) => { setDate(v); clearErr("date"); }} t={t} />
+          <FieldError text={errors.date} />
 
           <FieldLabel text={t.freqLabel} />
           <View style={styles.segmentRow}>
@@ -220,7 +242,7 @@ export function MedicationScreen() {
                   <Pressable style={styles.cardActionBtn} onPress={() => startEdit(entry)}>
                     <Text style={styles.cardActionBtnText}>✏️ {t.edit}</Text>
                   </Pressable>
-                  <Pressable style={[styles.cardActionBtn, styles.cardActionBtnDanger]} onPress={() => remove(entry._id)}>
+                  <Pressable style={[styles.cardActionBtn, styles.cardActionBtnDanger]} onPress={() => remove(entry)} accessibilityLabel={t.delete}>
                     <Text style={[styles.cardActionBtnText, styles.cardActionBtnTextDanger]}>🗑 {t.delete}</Text>
                   </Pressable>
                 </View>

@@ -189,3 +189,46 @@ describe("Farm deletion confirmation", () => {
     expect(mockFarmsClient.delete).not.toHaveBeenCalled();
   });
 });
+
+describe("Undoable delete (medication)", () => {
+  const medEntry = {
+    _id: "m1",
+    medicineName: "Baycox",
+    dose: "3ml",
+    date: "2026-06-23",
+    frequency: "once",
+    animalId: { _id: "a1", name: "Rex" },
+  };
+  const animal = { _id: "a1", name: "Rex", designation: "Galinha", sex: "male", ringNumber: "G1", birthDate: "2025-01-01" };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockLogin.mockResolvedValue({ token: "test-token", user: { id: "u1", email: "owner@example.com" } });
+    mockFarmsClient.get.mockResolvedValue({ data: [{ _id: "f1", name: "Quinta X" }] });
+    mockDataClient.get.mockImplementation((url: string) => {
+      if (url === "/medication") return Promise.resolve({ data: [medEntry] });
+      if (url === "/animals") return Promise.resolve({ data: [animal] });
+      return Promise.resolve({ data: [] });
+    });
+    mockDataClient.delete.mockResolvedValue({ data: {} });
+  });
+
+  it("removes the row and offers Undo without deleting immediately, then restores on Undo", async () => {
+    const screen = await signIn();
+
+    // Go to the Medication tab and wait for the record to render.
+    fireEvent.press(await screen.findByText("Medicacao"));
+    await screen.findByText("Baycox");
+
+    // Delete → optimistic removal + Undo toast, but no server call yet.
+    fireEvent.press(screen.getByLabelText("Eliminar"));
+    await waitFor(() => expect(screen.queryByText("Baycox")).toBeNull());
+    await screen.findByText("Anular");
+    expect(mockDataClient.delete).not.toHaveBeenCalled();
+
+    // Undo restores the row and never hits the server.
+    fireEvent.press(screen.getByText("Anular"));
+    await screen.findByText("Baycox");
+    expect(mockDataClient.delete).not.toHaveBeenCalled();
+  });
+});

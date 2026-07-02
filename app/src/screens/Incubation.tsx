@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
-import { Badge, EmptyState, FieldLabel, SectionHeader } from "../components";
+import { Badge, EmptyState, FieldError, FieldLabel, SectionHeader } from "../components";
 import { useApp } from "../context";
 import { DatePickerField } from "../datepicker";
-import { useConfirmDelete } from "../hooks";
+import { useUndoableDelete } from "../hooks";
 import { addDaysIso, daysBetweenIso, isDate, todayIso, toIsoDateOnly } from "../helpers";
-import { useAnimalTypes, useIncubation, useInvalidateFarmData } from "../queries";
+import { qk, useAnimalTypes, useIncubation, useInvalidateFarmData } from "../queries";
 import { styles } from "../styles";
 import { C } from "../theme";
 import { IncubationBatch } from "../types";
@@ -16,7 +16,7 @@ const INCUBATION_DEFAULT_DAYS = 21;
 export function IncubationScreen() {
   const { t, api, farmId, token, showToast, setTab, setAnimalSubTab, canWrite } = useApp();
   const invalidate = useInvalidateFarmData(farmId);
-  const confirmDelete = useConfirmDelete();
+  const undoDelete = useUndoableDelete();
 
   const { data: incubationList = [] } = useIncubation(api, farmId, token);
   const { data: animalTypes = [] } = useAnimalTypes(api, farmId, token);
@@ -32,6 +32,10 @@ export function IncubationScreen() {
   const [resultOk, setResultOk] = useState("");
   const [resultNok, setResultNok] = useState("");
 
+  type FieldErrors = { species?: string; incubatorName?: string; eggCount?: string; startDate?: string; expectedDate?: string };
+  const [errors, setErrors] = useState<FieldErrors>({});
+  const clearErr = (k: keyof FieldErrors) => setErrors((e) => (e[k] ? { ...e, [k]: undefined } : e));
+
   const resetForm = () => {
     setEditingId(null);
     setSpecies("");
@@ -39,6 +43,7 @@ export function IncubationScreen() {
     setIncubatorName("");
     setStartDate(todayIso());
     setExpectedDate(addDaysIso(todayIso(), INCUBATION_DEFAULT_DAYS));
+    setErrors({});
   };
 
   // Moving the start date shifts the hatch date by the same amount, preserving
@@ -46,6 +51,7 @@ export function IncubationScreen() {
   const onStartChange = (next: string) => {
     const gap = daysBetweenIso(startDate, expectedDate);
     setStartDate(next);
+    clearErr("startDate");
     if (gap !== null && gap >= 0) setExpectedDate(addDaysIso(next, gap));
   };
 
@@ -57,16 +63,21 @@ export function IncubationScreen() {
     setStartDate(toIsoDateOnly(batch.startDate));
     setExpectedDate(toIsoDateOnly(batch.expectedHatchDate));
     setResultBatchId(null);
+    setErrors({});
     setShowForm(true);
   };
 
   const save = async () => {
     if (!farmId) { showToast("warning", t.valSelectFarm); return; }
-    if (!isDate(startDate) || !isDate(expectedDate)) { showToast("warning", t.valDates); return; }
-    if (!species.trim() || !incubatorName.trim() || Number(eggCount) < 1 || Number.isNaN(Number(eggCount))) {
-      showToast("warning", t.valIncubationFields);
-      return;
-    }
+    const eggs = Number(eggCount);
+    const next: FieldErrors = {};
+    if (!species.trim()) next.species = t.fieldSelectRequired;
+    if (!incubatorName.trim()) next.incubatorName = t.fieldRequired;
+    if (!eggCount.trim() || Number.isNaN(eggs) || eggs < 1) next.eggCount = t.fieldInvalidNumber;
+    if (!isDate(startDate)) next.startDate = t.fieldInvalidDate;
+    if (!isDate(expectedDate)) next.expectedDate = t.fieldInvalidDate;
+    setErrors(next);
+    if (Object.keys(next).length > 0) return;
     const payload = {
       species,
       eggCount: Number(eggCount),
@@ -90,8 +101,13 @@ export function IncubationScreen() {
     }
   };
 
-  const remove = (id: string) =>
-    confirmDelete({ url: `/incubation/${id}`, onDeleted: invalidate });
+  const remove = (batch: IncubationBatch) =>
+    undoDelete({
+      queryKey: qk.incubation(farmId),
+      item: batch,
+      url: `/incubation/${batch._id}`,
+      onCommitted: invalidate,
+    });
 
   const openResultForm = (batch: IncubationBatch) => {
     setResultBatchId(batch._id);
@@ -142,27 +158,34 @@ export function IncubationScreen() {
               {animalTypes.map((type) => (
                 <Pressable key={type._id}
                   style={[styles.chip, species === type.name && styles.chipActive]}
-                  onPress={() => setSpecies(type.name)}
+                  onPress={() => { setSpecies(type.name); clearErr("species"); }}
                 >
                   <Text style={[styles.chipText, species === type.name && styles.chipTextActive]}>{type.name}</Text>
                 </Pressable>
               ))}
             </ScrollView>
           )}
+          <FieldError text={errors.species} />
 
           <FieldLabel text={t.eggCountPlaceholder} />
-          <TextInput style={styles.input} value={eggCount} onChangeText={setEggCount}
+          <TextInput style={[styles.input, errors.eggCount && styles.inputError]} value={eggCount}
+            onChangeText={(v) => { setEggCount(v); clearErr("eggCount"); }}
             placeholder={t.eggCountPlaceholder} keyboardType="numeric" placeholderTextColor={C.textMuted} />
+          <FieldError text={errors.eggCount} />
 
           <FieldLabel text={t.incubatorPlaceholder} />
-          <TextInput style={styles.input} value={incubatorName} onChangeText={setIncubatorName}
+          <TextInput style={[styles.input, errors.incubatorName && styles.inputError]} value={incubatorName}
+            onChangeText={(v) => { setIncubatorName(v); clearErr("incubatorName"); }}
             placeholder={t.incubatorPlaceholder} placeholderTextColor={C.textMuted} />
+          <FieldError text={errors.incubatorName} />
 
           <FieldLabel text={t.startDatePlaceholder} />
           <DatePickerField value={startDate} onChange={onStartChange} t={t} />
+          <FieldError text={errors.startDate} />
 
           <FieldLabel text={t.hatchDatePlaceholder} />
-          <DatePickerField value={expectedDate} onChange={setExpectedDate} t={t} minValue={startDate} />
+          <DatePickerField value={expectedDate} onChange={(v) => { setExpectedDate(v); clearErr("expectedDate"); }} t={t} minValue={startDate} />
+          <FieldError text={errors.expectedDate} />
 
           <Pressable style={styles.primaryBtn} onPress={save}>
             <Text style={styles.primaryBtnText}>{editingId ? t.saveChanges : t.saveIncubation}</Text>
@@ -236,7 +259,7 @@ export function IncubationScreen() {
                   <Pressable style={styles.cardActionBtn} onPress={() => startEdit(batch)}>
                     <Text style={styles.cardActionBtnText}>✏️ {t.edit}</Text>
                   </Pressable>
-                  <Pressable style={[styles.cardActionBtn, styles.cardActionBtnDanger]} onPress={() => remove(batch._id)}>
+                  <Pressable style={[styles.cardActionBtn, styles.cardActionBtnDanger]} onPress={() => remove(batch)} accessibilityLabel={t.delete}>
                     <Text style={[styles.cardActionBtnText, styles.cardActionBtnTextDanger]}>🗑 {t.delete}</Text>
                   </Pressable>
                 </View>

@@ -1,7 +1,7 @@
 import * as ImagePicker from "expo-image-picker";
 import { useMemo, useState } from "react";
 import { ActivityIndicator, Image, Pressable, ScrollView, Text, TextInput, View } from "react-native";
-import { Badge, EmptyState, FieldLabel, SectionHeader } from "../components";
+import { Badge, EmptyState, FieldError, FieldLabel, SectionHeader } from "../components";
 import { AnimalSort, AnimalSubTab, useApp } from "../context";
 import { AnimalHistoryModal } from "./AnimalHistory";
 import { DatePickerField } from "../datepicker";
@@ -74,6 +74,11 @@ export function AnimalsScreen(view: AnimalsViewState) {
   const [animalStatusDate, setAnimalStatusDate] = useState("");
   const [animalStatusReason, setAnimalStatusReason] = useState("");
 
+  type AnimalFieldErrors = { name?: string; designation?: string; ringNumber?: string; birthDate?: string };
+  const [animalErrors, setAnimalErrors] = useState<AnimalFieldErrors>({});
+  const clearAnimalErr = (k: keyof AnimalFieldErrors) =>
+    setAnimalErrors((e) => (e[k] ? { ...e, [k]: undefined } : e));
+
   // ── Type form state ──
   const [showTypeForm, setShowTypeForm] = useState(false);
   const [typeName, setTypeName] = useState("");
@@ -97,6 +102,7 @@ export function AnimalsScreen(view: AnimalsViewState) {
     setAnimalStatus("active");
     setAnimalStatusDate("");
     setAnimalStatusReason("");
+    setAnimalErrors({});
   };
 
   const startEditAnimal = (animal: Animal) => {
@@ -112,6 +118,7 @@ export function AnimalsScreen(view: AnimalsViewState) {
     setAnimalStatus(statusOf(animal));
     setAnimalStatusDate(toIsoDateOnly(animal.statusDate));
     setAnimalStatusReason(animal.statusReason ?? "");
+    setAnimalErrors({});
     setShowAnimalForm(true);
   };
 
@@ -128,11 +135,13 @@ export function AnimalsScreen(view: AnimalsViewState) {
 
   const saveAnimal = async () => {
     if (!farmId) { showToast("warning", t.valSelectFarm); return; }
-    if (!animalName.trim() || !animalDesignation.trim() || !animalRingNumber.trim()) {
-      showToast("warning", t.valAnimalFields);
-      return;
-    }
-    if (!isDate(animalBirthDate)) { showToast("warning", t.valBirthDate); return; }
+    const next: AnimalFieldErrors = {};
+    if (!animalName.trim()) next.name = t.fieldRequired;
+    if (!animalDesignation.trim()) next.designation = t.fieldSelectRequired;
+    if (!animalRingNumber.trim()) next.ringNumber = t.fieldRequired;
+    if (!isDate(animalBirthDate)) next.birthDate = t.fieldInvalidDate;
+    setAnimalErrors(next);
+    if (Object.keys(next).length > 0) return;
     const payload = {
       name: animalName.trim(),
       designation: animalDesignation.trim(),
@@ -306,7 +315,7 @@ export function AnimalsScreen(view: AnimalsViewState) {
                   />
                 </View>
                 {canWrite && (
-                  <Pressable style={styles.typeDeleteBtn} onPress={() => deleteType(type._id, type.name)}>
+                  <Pressable style={styles.typeDeleteBtn} onPress={() => deleteType(type._id, type.name)} accessibilityLabel={t.delete}>
                     <Text style={styles.typeDeleteBtnText}>🗑</Text>
                   </Pressable>
                 )}
@@ -338,13 +347,14 @@ export function AnimalsScreen(view: AnimalsViewState) {
                   autoCapitalize="none"
                 />
                 {search !== "" && (
-                  <Pressable onPress={() => setSearch("")} hitSlop={8}>
+                  <Pressable onPress={() => setSearch("")} hitSlop={8} accessibilityLabel={t.a11yClearSearch}>
                     <Text style={styles.searchClear}>✕</Text>
                   </Pressable>
                 )}
                 <Pressable
                   style={[styles.filterToggle, (showFilters || filtersActive) && styles.filterToggleActive]}
                   onPress={() => setShowFilters(!showFilters)}
+                  accessibilityLabel={t.a11yFilters}
                 >
                   <Text style={[styles.filterToggleText, (showFilters || filtersActive) && styles.filterToggleTextActive]}>⚙</Text>
                 </Pressable>
@@ -412,8 +422,10 @@ export function AnimalsScreen(view: AnimalsViewState) {
               </Text>
 
               <FieldLabel text={t.namePlaceholder} />
-              <TextInput style={styles.input} value={animalName} onChangeText={setAnimalName}
+              <TextInput style={[styles.input, animalErrors.name && styles.inputError]} value={animalName}
+                onChangeText={(v) => { setAnimalName(v); clearAnimalErr("name"); }}
                 placeholder={t.namePlaceholder} placeholderTextColor={C.textMuted} />
+              <FieldError text={animalErrors.name} />
 
               <FieldLabel text={t.animalTypeLabel} />
               {animalTypes.length === 0 ? (
@@ -431,6 +443,7 @@ export function AnimalsScreen(view: AnimalsViewState) {
                           setAnimalMotherId("");
                         }
                         setAnimalDesignation(type.name);
+                        clearAnimalErr("designation");
                       }}
                     >
                       <Text style={[styles.chipText, animalDesignation === type.name && styles.chipTextActive]}>{type.name}</Text>
@@ -438,6 +451,7 @@ export function AnimalsScreen(view: AnimalsViewState) {
                   ))}
                 </ScrollView>
               )}
+              <FieldError text={animalErrors.designation} />
 
               <FieldLabel text={t.sexPlaceholder} />
               <View style={styles.segmentRow}>
@@ -455,11 +469,14 @@ export function AnimalsScreen(view: AnimalsViewState) {
               </View>
 
               <FieldLabel text={t.birthDatePlaceholder} />
-              <DatePickerField value={animalBirthDate} onChange={setAnimalBirthDate} t={t} />
+              <DatePickerField value={animalBirthDate} onChange={(v) => { setAnimalBirthDate(v); clearAnimalErr("birthDate"); }} t={t} />
+              <FieldError text={animalErrors.birthDate} />
 
               <FieldLabel text={t.ringNumberPlaceholder} />
-              <TextInput style={styles.input} value={animalRingNumber} onChangeText={setAnimalRingNumber}
+              <TextInput style={[styles.input, animalErrors.ringNumber && styles.inputError]} value={animalRingNumber}
+                onChangeText={(v) => { setAnimalRingNumber(v); clearAnimalErr("ringNumber"); }}
                 placeholder={t.ringNumberPlaceholder} placeholderTextColor={C.textMuted} />
+              <FieldError text={animalErrors.ringNumber} />
 
               <FieldLabel text={t.fatherIdPlaceholder} />
               {animals.filter((a) => a.sex === "male" && a.designation === animalDesignation && a._id !== editingAnimal?._id).length > 0 && (

@@ -15,6 +15,12 @@ export function FieldLabel({ text }: { text: string }) {
   return <Text style={styles.fieldLabel}>{text}</Text>;
 }
 
+/** Inline validation message shown under a field; renders nothing when absent. */
+export function FieldError({ text }: { text?: string }) {
+  if (!text) return null;
+  return <Text style={styles.fieldError}>{text}</Text>;
+}
+
 export function SectionHeader({
   title,
   count,
@@ -144,6 +150,12 @@ const styles = StyleSheet.create({
     marginTop: 6,
     textTransform: "uppercase",
     letterSpacing: 0.5,
+  },
+  fieldError: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: C.danger,
+    marginBottom: 4,
   },
 
   // Section header
